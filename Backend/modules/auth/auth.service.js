@@ -208,60 +208,6 @@ const resetPassword = async (token, newPassword) => {
   return user;
 };
 
-// Generate email verification token
-const generateEmailVerificationToken = async (userId) => {
-  const user = await User.findById(userId);
-
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  if (user.isEmailVerified) {
-    throw new Error('Email is already verified');
-  }
-
-  // Generate token
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-
-  // Hash token and set to emailVerificationToken field
-  user.emailVerificationToken = crypto
-    .createHash('sha256')
-    .update(verificationToken)
-    .digest('hex');
-
-  // Set expire (24 hours)
-  user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
-
-  await user.save();
-
-  return verificationToken;
-};
-
-// Verify email
-const verifyEmail = async (token) => {
-  // Get hashed token
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(token)
-    .digest('hex');
-
-  const user = await User.findOne({
-    emailVerificationToken: hashedToken,
-    emailVerificationExpires: { $gt: Date.now() }
-  });
-
-  if (!user) {
-    throw new Error('Invalid or expired verification token');
-  }
-
-  // Mark email as verified
-  user.isEmailVerified = true;
-  user.emailVerificationToken = undefined;
-  user.emailVerificationExpires = undefined;
-  await user.save();
-
-  return user;
-};
 
 module.exports = {
   register,
@@ -272,7 +218,5 @@ module.exports = {
   changePassword,
   forgotPassword,
   resetPassword,
-  generateEmailVerificationToken,
-  verifyEmail,
   sendTokenResponse
 };

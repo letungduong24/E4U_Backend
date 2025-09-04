@@ -90,7 +90,6 @@ router.post('/register', registerValidation, validate, authController.register);
 router.post('/login', loginValidation, validate, authController.login);
 router.post('/forgotpassword', forgotPasswordValidation, validate, authController.forgotPassword);
 router.put('/resetpassword/:resettoken', resetPasswordValidation, validate, authController.resetPassword);
-router.get('/verify-email/:token', authController.verifyEmail);
 
 // Protected routes
 router.use(protect); // Apply protection to all routes below
@@ -98,6 +97,5 @@ router.get('/me', authController.getMe);
 router.put('/updateprofile', updateProfileValidation, validate, authController.updateProfile);
 router.put('/changepassword', changePasswordValidation, validate, authController.changePassword);
 router.post('/logout', authController.logout);
-router.post('/verify-email/generate', authController.generateEmailVerification);
 
 module.exports = router;

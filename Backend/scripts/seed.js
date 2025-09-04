@@ -1,13 +1,13 @@
 const mongoose = require('mongoose');
-const User = require('../modules/user/user.model');
+const User = require('../modules/auth/user.model');
 require('dotenv').config();
 
 const seedUsers = [
   {
     firstName: 'Admin',
-    lastName: 'Dương',
+    lastName: 'User',
     email: 'admin@stdmng.com',
-    password: 'Admin123!',
+    password: 'Admin123@',
     role: 'admin',
     isEmailVerified: true,
     profile: {
@@ -23,8 +23,8 @@ const seedUsers = [
     }
   },
   {
-    firstName: 'Giáo viên',
-    lastName: 'Giang',
+    firstName: 'Teacher',
+    lastName: 'User',
     email: 'teacher@stdmng.com',
     password: 'Teacher123!',
     role: 'teacher',
@@ -42,10 +42,10 @@ const seedUsers = [
     }
   },
   {
-    firstName: 'Học sinh',
-    lastName: 'Đức',
+    firstName: 'Student',
+    lastName: 'User',
     email: 'student@stdmng.com',
-    password: 'Student123!',
+    password: 'Student!',
     role: 'student',
     isEmailVerified: true,
     profile: {
@@ -65,39 +65,37 @@ const seedUsers = [
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Đã kết nối MongoDB');
+    console.log('MongoDB Connected for seeding');
   } catch (error) {
-    console.error('Lỗi kết nối MongoDB:', error);
+    console.error('Error connecting to MongoDB:', error);
     process.exit(1);
   }
 };
 
 const seedDatabase = async () => {
   try {
+    // Clear existing users
     await User.deleteMany({});
-    console.log('Xoá dữ liệu đang có');
+    console.log('Cleared existing users');
 
+    // Create seed users
     const createdUsers = await User.create(seedUsers);
-    console.log(`Đã tạo ${createdUsers.length} người dùng`);
+    console.log(`Created ${createdUsers.length} seed users`);
 
+    // Display created users
     createdUsers.forEach(user => {
       console.log(`👤 ${user.role.toUpperCase()}: ${user.email} (${user.fullName})`);
     });
 
-    console.log('\nTạo dữ liệu mẫu thành công!');
-    console.log('\Thông tin:');
-    console.log('Admin: admin@stdmng.com / Admin123!');
-    console.log('Teacher: teacher@stdmng.com / Teacher123!');
-    console.log('Student: student@stdmng.com / Student123!');
-
   } catch (error) {
-    console.error('Lỗi tạo dữ liệu mẫu:', error);
+    console.error('Error seeding database:', error);
   } finally {
     mongoose.connection.close();
-    console.log('Đóng kết nối MongoDB');
+    console.log('🔌 Database connection closed');
   }
 };
 
+// Run seeding
 if (require.main === module) {
   connectDB().then(() => {
     seedDatabase();

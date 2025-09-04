@@ -4,19 +4,19 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: [true, 'Họ không được để trống'],
+    required: [true, 'First name is required'],
     trim: true,
-    maxlength: [50, 'Họ không được dài hơn 50 ký tự']
+    maxlength: [50, 'First name cannot be more than 50 characters']
   },
   lastName: {
     type: String,
-    required: [true, 'Tên không được để trống'],
+    required: [true, 'Last name is required'],
     trim: true,
-    maxlength: [50, 'Tên không được dài hơn 50 ký tự']
+    maxlength: [50, 'Last name cannot be more than 50 characters']
   },
   email: {
     type: String,
-    required: [true, 'Email không được để trống'],
+    required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
     trim: true,
@@ -27,13 +27,13 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Mật khẩu không được để trống'],
-    minlength: [8, 'Mật khẩu phải có tối thiểu 8 ký tự'],
+    required: [true, 'Password is required'],
+    minlength: [8, 'Password must be at least 8 characters'],
     select: false
   },
   role: {
     type: String,
-    enum: ['student', 'admin', 'teacher'],
+    enum: ['admin', 'student', 'teacher'],
     default: 'student'
   },
   isActive: {
@@ -60,6 +60,8 @@ const userSchema = new mongoose.Schema({
     },
     address: {
       type: String,
+      trim: true,
+      maxlength: [100, 'Address cannot be more than 100 characters']
     },
     preferences: {
       notifications: {

@@ -121,47 +121,6 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-// @desc    Generate email verification token
-// @route   POST /api/auth/verify-email/generate
-// @access  Private
-const generateEmailVerification = async (req, res, next) => {
-  try {
-    const verificationToken = await authService.generateEmailVerificationToken(req.user.id);
-    
-    // In a real application, you would send this token via email
-    // For now, we'll just return it in the response
-    res.status(200).json({
-      status: 'success',
-      message: 'Email verification token generated',
-      data: {
-        verificationToken // Remove this in production
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Verify email
-// @route   GET /api/auth/verify-email/:token
-// @access  Public
-const verifyEmail = async (req, res, next) => {
-  try {
-    const { token } = req.params;
-    const user = await authService.verifyEmail(token);
-    
-    res.status(200).json({
-      status: 'success',
-      message: 'Email verified successfully',
-      data: {
-        user
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   register,
   login,
@@ -171,6 +130,4 @@ module.exports = {
   changePassword,
   forgotPassword,
   resetPassword,
-  generateEmailVerification,
-  verifyEmail
 };

@@ -67,12 +67,81 @@ const setUserActiveStatus = async (req, res, next) => {
   }
 };
 
+// @desc    Create subject
+// @route   POST /api/admin/subjects
+// @access  Admin
+const createSubject = async (req, res, next) => {
+  try {
+    const subject = await adminService.createSubject(req.body);
+    res.status(201).json({ status: 'success', data: { subject } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    List subjects
+// @route   GET /api/admin/subjects
+// @access  Admin
+const listSubjects = async (req, res, next) => {
+  try {
+    const { page, limit, q } = req.query;
+    const result = await adminService.listSubjects({ page, limit, q });
+    res.status(200).json({ status: 'success', data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get subject by id
+// @route   GET /api/admin/subjects/:id
+// @access  Admin
+const getSubjectById = async (req, res, next) => {
+  try {
+    const subject = await adminService.getSubjectById(req.params.id);
+    res.status(200).json({ status: 'success', data: { subject } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update subject
+// @route   PUT /api/admin/subjects/:id
+// @access  Admin
+const updateSubject = async (req, res, next) => {
+  try {
+    const subject = await adminService.updateSubject(req.params.id, req.body);
+    res.status(200).json({ status: 'success', data: { subject } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete subject
+// @route   DELETE /api/admin/subjects/:id
+// @access  Admin
+const deleteSubject = async (req, res, next) => {
+  try {
+    const result = await adminService.deleteSubject(req.params.id);
+    res.status(200).json({ status: 'success', message: result.message });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 module.exports = {
   listUsers,
   getUserById,
   updateUserByAdmin,
   deleteUser,
-  setUserActiveStatus
+  setUserActiveStatus,
+  // Subjects
+  createSubject,
+  listSubjects,
+  getSubjectById,
+  updateSubject,
+  deleteSubject
 };
 
 
