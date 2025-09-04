@@ -1,6 +1,5 @@
-const User = require('../auth/user.model');
+const User = require('../user/user.model');
 const ClassModel = require('./class.model');
-const SubjectModel = require('./subject.model');
 
 // User management
 const listUsers = async ({ page = 1, limit = 10, role, isActive }) => {
@@ -62,20 +61,38 @@ const setUserActiveStatus = async (userId, isActive) => {
   return user;
 };
 
-// Subject management
-const createSubject = async (payload) => {
-  const { name, code, credits = 0, description, metadata } = payload;
-  const subject = await SubjectModel.create({ name, code, description });
-  return subject;
+// Class management
+const createClass = async (payload) => {
+  const { name, code, description, homeroomTeacher, students = [], schedule = [], startDate, endDate, metadata } = payload;
+  const teacher = await User.findById(homeroomTeacher);
+  if (!teacher) throw new Error('Homeroom teacher not found');
+  const classDoc = await ClassModel.create({
+    name,
+    code,
+    description,
+    homeroomTeacher,
+    students,
+    schedule,
+    startDate,
+    endDate,
+    metadata
+  });
+  return classDoc;
 };
 
-const listSubjects = async ({ page = 1, limit = 10, q }) => {
+const listClasses = async ({ page = 1, limit = 10, teacher, q }) => {
   const query = {};
+  if (teacher) query.homeroomTeacher = teacher;
   if (q) query.$or = [{ name: new RegExp(q, 'i') }, { code: new RegExp(q, 'i') }];
   const skip = (Number(page) - 1) * Number(limit);
   const [items, total] = await Promise.all([
-    SubjectModel.find(query).skip(skip).limit(Number(limit)).sort({ createdAt: -1 }),
-    SubjectModel.countDocuments(query)
+    ClassModel.find(query)
+      .populate('homeroomTeacher', 'firstName lastName email role')
+      .populate('students', 'firstName lastName email role')
+      .skip(skip)
+      .limit(Number(limit))
+      .sort({ createdAt: -1 }),
+    ClassModel.countDocuments(query)
   ]);
   return {
     items,
@@ -86,27 +103,59 @@ const listSubjects = async ({ page = 1, limit = 10, q }) => {
   };
 };
 
-const getSubjectById = async (subjectId) => {
-  const subject = await SubjectModel.findById(subjectId);
-  if (!subject) throw new Error('Subject not found');
-  return subject;
+const getClassById = async (classId) => {
+  const cls = await ClassModel.findById(classId)
+    .populate('homeroomTeacher', 'firstName lastName email role')
+    .populate('students', 'firstName lastName email role');
+  if (!cls) throw new Error('Class not found');
+  return cls;
 };
 
-const updateSubject = async (subjectId, updateData) => {
+const updateClass = async (classId, updateData) => {
+  if (updateData.homeroomTeacher) {
+    const teacher = await User.findById(updateData.homeroomTeacher);
+    if (!teacher) throw new Error('Homeroom teacher not found');
+  }
   const allowed = ['name', 'code', 'description'];
   const payload = {};
   for (const key of allowed) {
     if (Object.prototype.hasOwnProperty.call(updateData, key)) payload[key] = updateData[key];
   }
-  const subject = await SubjectModel.findByIdAndUpdate(subjectId, payload, { new: true, runValidators: true });
-  if (!subject) throw new Error('Subject not found');
-  return subject;
+  const cls = await ClassModel.findByIdAndUpdate(classId, payload, { new: true, runValidators: true })
+    .populate('homeroomTeacher', 'firstName lastName email role')
+    .populate('students', 'firstName lastName email role');
+  if (!cls) throw new Error('Class not found');
+  return cls;
 };
 
-const deleteSubject = async (subjectId) => {
-  const subject = await SubjectModel.findByIdAndDelete(subjectId);
-  if (!subject) throw new Error('Subject not found');
-  return { message: 'Subject deleted' };
+const deleteClass = async (classId) => {
+  const cls = await ClassModel.findByIdAndDelete(classId);
+  if (!cls) throw new Error('Class not found');
+  return { message: 'Class deleted' };
+};
+
+const addStudents = async (classId, studentIds = []) => {
+  const existingStudents = await User.find({ _id: { $in: studentIds } }, '_id');
+  const existingIds = existingStudents.map(s => s._id);
+  const cls = await ClassModel.findByIdAndUpdate(
+    classId,
+    { $addToSet: { students: { $each: existingIds } } },
+    { new: true }
+  ).populate('homeroomTeacher', 'firstName lastName email role')
+   .populate('students', 'firstName lastName email role');
+  if (!cls) throw new Error('Class not found');
+  return cls;
+};
+
+const removeStudents = async (classId, studentIds = []) => {
+  const cls = await ClassModel.findByIdAndUpdate(
+    classId,
+    { $pull: { students: { $in: studentIds } } },
+    { new: true }
+  ).populate('homeroomTeacher', 'firstName lastName email role')
+   .populate('students', 'firstName lastName email role');
+  if (!cls) throw new Error('Class not found');
+  return cls;
 };
 
 module.exports = {
@@ -116,12 +165,14 @@ module.exports = {
   updateUserByAdmin,
   deleteUser,
   setUserActiveStatus,
-  // subject
-  createSubject,
-  listSubjects,
-  getSubjectById,
-  updateSubject,
-  deleteSubject
+  // class
+  createClass,
+  listClasses,
+  getClassById,
+  updateClass,
+  deleteClass,
+  addStudents,
+  removeStudents
 };
 
 

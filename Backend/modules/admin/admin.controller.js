@@ -67,62 +67,86 @@ const setUserActiveStatus = async (req, res, next) => {
   }
 };
 
-// @desc    Create subject
-// @route   POST /api/admin/subjects
+// @desc    Create class
+// @route   POST /api/admin/classes
 // @access  Admin
-const createSubject = async (req, res, next) => {
+const createClass = async (req, res, next) => {
   try {
-    const subject = await adminService.createSubject(req.body);
-    res.status(201).json({ status: 'success', data: { subject } });
+    const cls = await adminService.createClass(req.body);
+    res.status(201).json({ status: 'success', data: { class: cls } });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    List subjects
-// @route   GET /api/admin/subjects
+// @desc    List classes
+// @route   GET /api/admin/classes
 // @access  Admin
-const listSubjects = async (req, res, next) => {
+const listClasses = async (req, res, next) => {
   try {
-    const { page, limit, q } = req.query;
-    const result = await adminService.listSubjects({ page, limit, q });
+    const { page, limit, teacher, q } = req.query;
+    const result = await adminService.listClasses({ page, limit, teacher, q });
     res.status(200).json({ status: 'success', data: result });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Get subject by id
-// @route   GET /api/admin/subjects/:id
+// @desc    Get class by id
+// @route   GET /api/admin/classes/:id
 // @access  Admin
-const getSubjectById = async (req, res, next) => {
+const getClassById = async (req, res, next) => {
   try {
-    const subject = await adminService.getSubjectById(req.params.id);
-    res.status(200).json({ status: 'success', data: { subject } });
+    const cls = await adminService.getClassById(req.params.id);
+    res.status(200).json({ status: 'success', data: { class: cls } });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Update subject
-// @route   PUT /api/admin/subjects/:id
+// @desc    Update class
+// @route   PUT /api/admin/classes/:id
 // @access  Admin
-const updateSubject = async (req, res, next) => {
+const updateClass = async (req, res, next) => {
   try {
-    const subject = await adminService.updateSubject(req.params.id, req.body);
-    res.status(200).json({ status: 'success', data: { subject } });
+    const cls = await adminService.updateClass(req.params.id, req.body);
+    res.status(200).json({ status: 'success', data: { class: cls } });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Delete subject
-// @route   DELETE /api/admin/subjects/:id
+// @desc    Delete class
+// @route   DELETE /api/admin/classes/:id
 // @access  Admin
-const deleteSubject = async (req, res, next) => {
+const deleteClass = async (req, res, next) => {
   try {
-    const result = await adminService.deleteSubject(req.params.id);
+    const result = await adminService.deleteClass(req.params.id);
     res.status(200).json({ status: 'success', message: result.message });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Add students to class
+// @route   POST /api/admin/classes/:id/students
+// @access  Admin
+const addStudents = async (req, res, next) => {
+  try {
+    const cls = await adminService.addStudents(req.params.id, req.body.studentIds || []);
+    res.status(200).json({ status: 'success', data: { class: cls } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove students from class
+// @route   DELETE /api/admin/classes/:id/students
+// @access  Admin
+const removeStudents = async (req, res, next) => {
+  try {
+    const cls = await adminService.removeStudents(req.params.id, req.body.studentIds || []);
+    res.status(200).json({ status: 'success', data: { class: cls } });
   } catch (error) {
     next(error);
   }
@@ -136,12 +160,14 @@ module.exports = {
   updateUserByAdmin,
   deleteUser,
   setUserActiveStatus,
-  // Subjects
-  createSubject,
-  listSubjects,
-  getSubjectById,
-  updateSubject,
-  deleteSubject
+  // Classes
+  createClass,
+  listClasses,
+  getClassById,
+  updateClass,
+  deleteClass,
+  addStudents,
+  removeStudents
 };
 
 
