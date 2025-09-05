@@ -1,4 +1,4 @@
-const authService = require('./auth.service');
+const authService = require('../services/auth.service');
 
 // @desc    Register user
 // @route   POST /api/auth/register
