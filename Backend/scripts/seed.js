@@ -1,15 +1,17 @@
 const mongoose = require('mongoose');
-const User = require('../modules/auth/user.model');
+const User = require('../models/user.model');
+const Class = require('../models/class.model');
+const StudentClass = require('../models/student_class.model');
 require('dotenv').config();
 
 const seedUsers = [
+  // Admin
   {
     firstName: 'Admin',
     lastName: 'User',
     email: 'admin@stdmng.com',
     password: 'Admin123@',
     role: 'admin',
-    isEmailVerified: true,
     profile: {
       phone: '+1234567890',
       gender: 'Nam',
@@ -22,16 +24,17 @@ const seedUsers = [
       }
     }
   },
+  // Teachers
   {
-    firstName: 'Teacher',
-    lastName: 'User',
-    email: 'teacher@stdmng.com',
+    firstName: 'Nguyễn',
+    lastName: 'Văn An',
+    email: 'teacher1@stdmng.com',
     password: 'Teacher123!',
     role: 'teacher',
-    isEmailVerified: true,
     profile: {
       phone: '+1234567891',
-      gender: 'Nữ',
+      gender: 'Nam',
+      address: '123 Đường ABC, Quận 1, TP.HCM',
       preferences: {
         notifications: {
           email: true,
@@ -42,15 +45,206 @@ const seedUsers = [
     }
   },
   {
-    firstName: 'Student',
-    lastName: 'User',
-    email: 'student@stdmng.com',
-    password: 'Student!',
-    role: 'student',
-    isEmailVerified: true,
+    firstName: 'Trần',
+    lastName: 'Thị Bình',
+    email: 'teacher2@stdmng.com',
+    password: 'Teacher123!',
+    role: 'teacher',
     profile: {
       phone: '+1234567892',
+      gender: 'Nữ',
+      address: '456 Đường XYZ, Quận 2, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: true,
+          sms: false
+        },
+      }
+    }
+  },
+  // Students
+  {
+    firstName: 'Lê',
+    lastName: 'Văn Cường',
+    email: 'student1@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567893',
       gender: 'Nam',
+      address: '789 Đường DEF, Quận 3, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Phạm',
+    lastName: 'Thị Dung',
+    email: 'student2@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567894',
+      gender: 'Nữ',
+      address: '321 Đường GHI, Quận 4, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Hoàng',
+    lastName: 'Văn Em',
+    email: 'student3@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567895',
+      gender: 'Nam',
+      address: '654 Đường JKL, Quận 5, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Vũ',
+    lastName: 'Thị Phương',
+    email: 'student4@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567896',
+      gender: 'Nữ',
+      address: '987 Đường MNO, Quận 6, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Đặng',
+    lastName: 'Văn Quang',
+    email: 'student5@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567897',
+      gender: 'Nam',
+      address: '147 Đường PQR, Quận 7, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Bùi',
+    lastName: 'Thị Rinh',
+    email: 'student6@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567898',
+      gender: 'Nữ',
+      address: '258 Đường STU, Quận 8, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Ngô',
+    lastName: 'Văn Sơn',
+    email: 'student7@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567899',
+      gender: 'Nam',
+      address: '369 Đường VWX, Quận 9, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Đinh',
+    lastName: 'Thị Tuyết',
+    email: 'student8@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567800',
+      gender: 'Nữ',
+      address: '741 Đường YZA, Quận 10, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Lý',
+    lastName: 'Văn Uyên',
+    email: 'student9@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567801',
+      gender: 'Nam',
+      address: '852 Đường BCD, Quận 11, TP.HCM',
+      preferences: {
+        notifications: {
+          email: true,
+          push: false,
+          sms: false
+        },
+      }
+    }
+  },
+  {
+    firstName: 'Hồ',
+    lastName: 'Thị Vân',
+    email: 'student10@stdmng.com',
+    password: 'Student123!',
+    role: 'student',
+    profile: {
+      phone: '+1234567802',
+      gender: 'Nữ',
+      address: '963 Đường EFG, Quận 12, TP.HCM',
       preferences: {
         notifications: {
           email: true,
@@ -61,6 +255,24 @@ const seedUsers = [
     }
   }
 ];
+
+const seedClasses = [
+  {
+    name: 'IELTS Foundation - Band 4.0-5.5',
+    code: 'IELTS-FOUNDATION',
+    description: 'Lớp IELTS Foundation dành cho học viên mới bắt đầu, mục tiêu đạt band 4.0-5.5',
+    maxStudents: 20,
+    isActive: true
+  },
+  {
+    name: 'IELTS Advanced - Band 6.0-7.5',
+    code: 'IELTS-ADVANCED',
+    description: 'Lớp IELTS Advanced dành cho học viên có nền tảng, mục tiêu đạt band 6.0-7.5',
+    maxStudents: 15,
+    isActive: true
+  }
+];
+
 
 const connectDB = async () => {
   try {
@@ -74,18 +286,123 @@ const connectDB = async () => {
 
 const seedDatabase = async () => {
   try {
-    // Clear existing users
+    // Clear existing data
     await User.deleteMany({});
-    console.log('Cleared existing users');
+    await Class.deleteMany({});
+    await StudentClass.deleteMany({});
+    console.log('Cleared existing data');
 
     // Create seed users
     const createdUsers = await User.create(seedUsers);
     console.log(`Created ${createdUsers.length} seed users`);
 
-    // Display created users
+    // Get teachers and students
+    const teachers = createdUsers.filter(user => user.role === 'teacher');
+    const students = createdUsers.filter(user => user.role === 'student');
+
+    // Create classes with teacher assignments
+    const classesWithTeachers = seedClasses.map((classData, index) => ({
+      ...classData,
+      homeroomTeacher: teachers[index % teachers.length]._id
+    }));
+
+    const createdClasses = await Class.create(classesWithTeachers);
+    console.log(`Created ${createdClasses.length} seed classes`);
+
+    // Assign students to classes
+    const class1 = createdClasses[0];
+    const class2 = createdClasses[1];
+    
+    // Assign first 5 students to class 1
+    const studentsClass1 = students.slice(0, 5);
+    class1.students = studentsClass1.map(s => s._id);
+    await class1.save();
+
+    // Assign next 5 students to class 2
+    const studentsClass2 = students.slice(5, 10);
+    class2.students = studentsClass2.map(s => s._id);
+    await class2.save();
+
+    // Update user current class relationships
+    for (const student of studentsClass1) {
+      student.currentClass = class1._id;
+      await student.save();
+    }
+
+    for (const student of studentsClass2) {
+      student.currentClass = class2._id;
+      await student.save();
+    }
+
+    // Update teacher teaching classes
+    teachers[0].teachingClasses = [class1._id];
+    teachers[1].teachingClasses = [class2._id];
+    await teachers[0].save();
+    await teachers[1].save();
+
+    // Create student enrollments
+    console.log('\n📝 Creating student enrollments...');
+    const enrollments = [];
+    
+    // Enroll students in class 1
+    for (const student of studentsClass1) {
+      const enrollment = await StudentClass.create({
+        student: student._id,
+        class: class1._id,
+        status: 'enrolled',
+        notes: 'Enrolled in IELTS Foundation class'
+      });
+      enrollments.push(enrollment);
+      
+      // Update user enrollment history
+      student.enrollmentHistory = [enrollment._id];
+      await student.save();
+    }
+    
+    // Enroll students in class 2
+    for (const student of studentsClass2) {
+      const enrollment = await StudentClass.create({
+        student: student._id,
+        class: class2._id,
+        status: 'enrolled',
+        notes: 'Enrolled in IELTS Advanced class'
+      });
+      enrollments.push(enrollment);
+      
+      // Update user enrollment history
+      student.enrollmentHistory = [enrollment._id];
+      await student.save();
+    }
+    
+    // Update classes with enrollment references
+    class1.enrollments = enrollments.slice(0, 5).map(e => e._id);
+    class2.enrollments = enrollments.slice(5, 10).map(e => e._id);
+    await class1.save();
+    await class2.save();
+    
+    console.log(`Created ${enrollments.length} student enrollments`);
+
+    // Display created data
+    console.log('\n📊 SEED DATA SUMMARY:');
+    console.log('='.repeat(50));
+    
     createdUsers.forEach(user => {
       console.log(`👤 ${user.role.toUpperCase()}: ${user.email} (${user.fullName})`);
     });
+
+    console.log('\n🏫 CLASSES:');
+    createdClasses.forEach(cls => {
+      console.log(`📚 ${cls.name} (${cls.code}) - Teacher: ${cls.homeroomTeacher}`);
+      console.log(`   Students: ${cls.students.length}/${cls.maxStudents} students`);
+      console.log(`   Description: ${cls.description}`);
+    });
+
+    console.log('\n📝 ENROLLMENTS:');
+    console.log(`   Total Enrollments: ${enrollments.length}`);
+    console.log(`   Active Enrollments: ${enrollments.filter(e => e.status === 'enrolled').length}`);
+
+
+    console.log('\n✅ Database seeded successfully!');
 
   } catch (error) {
     console.error('Error seeding database:', error);

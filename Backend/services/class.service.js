@@ -3,19 +3,30 @@ const ClassModel = require('../models/class.model');
 
 // Class management
 const createClass = async (payload) => {
-  const { name, code, description, homeroomTeacher, students = [], schedule = [], startDate, endDate, metadata } = payload;
+  const { name, code, description, homeroomTeacher, students = [], maxStudents = 30, isActive = true } = payload;
+  
+  // Validate teacher
   const teacher = await User.findById(homeroomTeacher);
   if (!teacher) throw new Error('Homeroom teacher not found');
+  if (teacher.role !== 'teacher') throw new Error('User is not a teacher');
+  
+  // Validate students (if provided)
+  if (students.length > 0) {
+    const studentDocs = await User.find({ _id: { $in: students } });
+    const invalidStudents = studentDocs.filter(s => s.role !== 'student');
+    if (invalidStudents.length > 0) {
+      throw new Error('Some users are not students');
+    }
+  }
+  
   const classDoc = await ClassModel.create({
     name,
     code,
     description,
     homeroomTeacher,
     students,
-    schedule,
-    startDate,
-    endDate,
-    metadata
+    maxStudents,
+    isActive
   });
   return classDoc;
 };
@@ -52,11 +63,14 @@ const getClassById = async (classId) => {
 };
 
 const updateClass = async (classId, updateData) => {
+  // Validate teacher if being updated
   if (updateData.homeroomTeacher) {
     const teacher = await User.findById(updateData.homeroomTeacher);
     if (!teacher) throw new Error('Homeroom teacher not found');
+    if (teacher.role !== 'teacher') throw new Error('User is not a teacher');
   }
-  const allowed = ['name', 'code', 'description'];
+  
+  const allowed = ['name', 'code', 'description', 'homeroomTeacher', 'maxStudents', 'isActive'];
   const payload = {};
   for (const key of allowed) {
     if (Object.prototype.hasOwnProperty.call(updateData, key)) payload[key] = updateData[key];
@@ -75,8 +89,16 @@ const deleteClass = async (classId) => {
 };
 
 const addStudents = async (classId, studentIds = []) => {
-  const existingStudents = await User.find({ _id: { $in: studentIds } }, '_id');
-  const existingIds = existingStudents.map(s => s._id);
+  // Validate all users are students
+  const users = await User.find({ _id: { $in: studentIds } }, '_id role');
+  const invalidUsers = users.filter(u => u.role !== 'student');
+  if (invalidUsers.length > 0) {
+    throw new Error('Some users are not students');
+  }
+  
+  const existingIds = users.map(s => s._id);
+  
+  // Add students to class
   const cls = await ClassModel.findByIdAndUpdate(
     classId,
     { $addToSet: { students: { $each: existingIds } } },
@@ -84,10 +106,18 @@ const addStudents = async (classId, studentIds = []) => {
   ).populate('homeroomTeacher', 'firstName lastName email role')
    .populate('students', 'firstName lastName email role');
   if (!cls) throw new Error('Class not found');
+
+  // Add class to students
+  await User.updateMany(
+    { _id: { $in: existingIds } },
+    { $addToSet: { classes: classId } }
+  );
+
   return cls;
 };
 
 const removeStudents = async (classId, studentIds = []) => {
+  // Remove students from class
   const cls = await ClassModel.findByIdAndUpdate(
     classId,
     { $pull: { students: { $in: studentIds } } },
@@ -95,6 +125,13 @@ const removeStudents = async (classId, studentIds = []) => {
   ).populate('homeroomTeacher', 'firstName lastName email role')
    .populate('students', 'firstName lastName email role');
   if (!cls) throw new Error('Class not found');
+
+  // Remove class from students
+  await User.updateMany(
+    { _id: { $in: studentIds } },
+    { $pull: { classes: classId } }
+  );
+
   return cls;
 };
 

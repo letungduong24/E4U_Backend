@@ -103,7 +103,15 @@ const logout = (res) => {
 
 // Get current user
 const getMe = async (userId) => {
-  const user = await User.findById(userId);
+  const user = await User.findById(userId)
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    });
   
   if (!user) {
     throw new Error('User not found');

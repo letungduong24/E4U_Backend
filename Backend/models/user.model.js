@@ -70,7 +70,14 @@ const userSchema = new mongoose.Schema({
         sms: { type: Boolean, default: false }
       },
     }
-  }
+  },
+  // Class relationships
+  currentClass: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' }, // Current class student is enrolled in
+  teachingClasses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }], // Classes teacher is teaching
+  
+  // Enrollment history (for students)
+  enrollmentHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StudentClass' }],
+  
 }, {
   timestamps: true,
   toJSON: { virtuals: true },
