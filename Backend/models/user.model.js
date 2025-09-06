@@ -73,7 +73,7 @@ const userSchema = new mongoose.Schema({
   },
   // Class relationships
   currentClass: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' }, // Current class student is enrolled in
-  teachingClasses: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Class' }], // Classes teacher is teaching
+  teachingClass: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' }, // Classes teacher is teaching
   
   // Enrollment history (for students)
   enrollmentHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StudentClass' }],

@@ -274,6 +274,7 @@ const seedClasses = [
 ];
 
 
+
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
@@ -335,8 +336,8 @@ const seedDatabase = async () => {
     }
 
     // Update teacher teaching classes
-    teachers[0].teachingClasses = [class1._id];
-    teachers[1].teachingClasses = [class2._id];
+    teachers[0].teachingClass = class1._id;
+    teachers[1].teachingClass = class2._id;
     await teachers[0].save();
     await teachers[1].save();
 
@@ -403,6 +404,34 @@ const seedDatabase = async () => {
 
 
     console.log('\n✅ Database seeded successfully!');
+
+
+    const Schedule = require('../models/schedule.model');
+    // Create schedules for classes
+    console.log('\n📅 Creating schedules for classes...')
+    const seedSchedules = [
+        {
+          class: class1._id,  
+          startDate: new Date('2025-09-08T08:00:00'),
+          endDate: new Date('2025-09-08T09:00:00'),
+        },
+        {
+          class: class2._id,
+          startDate: new Date('2025-09-08T09:10:00'),
+          endDate: new Date('2025-09-08T10:10:00'),
+        }
+      ];
+      await Schedule.deleteMany({});
+      for (const schedData of seedSchedules) {
+        const schedule = await Schedule.create(schedData);
+        console.log(`   Created schedule for class ${schedData.class} on ${schedData.startDate.toDateString()}`);
+        schedule.periods.push({ time: '08:00-09:00' });
+        schedule.periods.push({ time: '09:10-10:10' });
+        await schedule.save();
+        console.log(`   Created period for schedule ${schedule._id}`);
+      }
+      console.log('✅ Schedules created successfully!');
+
 
   } catch (error) {
     console.error('Error seeding database:', error);

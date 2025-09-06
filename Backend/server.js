@@ -13,7 +13,7 @@ const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const classRoutes = require('./routes/class.routes');
 const studentClassRoutes = require('./routes/student_class.routes');
-
+const scheduleRoutes = require('./routes/schedule.route');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -62,6 +62,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/student-classes', studentClassRoutes);
+app.use('/api/schedules', scheduleRoutes);
+
 
 // 404 handler
 app.use('*', (req, res) => {
