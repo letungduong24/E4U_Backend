@@ -14,6 +14,7 @@ const adminRoutes = require('./routes/admin.routes');
 const classRoutes = require('./routes/class.routes');
 const studentClassRoutes = require('./routes/student_class.routes');
 const scheduleRoutes = require('./routes/schedule.route');
+const homeworkRoutes = require('./routes/homework.routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -63,6 +64,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/student-classes', studentClassRoutes);
 app.use('/api/schedules', scheduleRoutes);
+app.use('/api/homeworks', homeworkRoutes);
 
 
 // 404 handler
