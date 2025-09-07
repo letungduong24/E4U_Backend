@@ -8,20 +8,14 @@ const router = express.Router();
 
 // Validation rules
 const homeworkCreateValidation = [
-  body('id')
-    .trim()
-    .isLength({ min: 2, max: 20 })
-    .withMessage('Assignment ID must be between 2 and 20 characters')
-    .matches(/^[A-Z0-9_]+$/)
-    .withMessage('Assignment ID must contain only uppercase letters, numbers, and underscores'),
-  body('Description')
+  body('description')
     .trim()
     .isLength({ min: 10, max: 2000 })
     .withMessage('Description must be between 10 and 2000 characters'),
-  body('ClassId')
+  body('classId')
     .isMongoId()
     .withMessage('Valid Class ID is required'),
-  body('Deadline')
+  body('deadline')
     .isISO8601()
     .withMessage('Valid deadline is required')
     .custom((value) => {
@@ -30,10 +24,6 @@ const homeworkCreateValidation = [
       }
       return true;
     }),
-  body('Files')
-    .optional()
-    .isArray()
-    .withMessage('Files must be an array')
 ];
 
 const homeworkUpdateValidation = [
@@ -66,10 +56,6 @@ const homeworkUpdateValidation = [
 ];
 
 
-const mongoIdValidation = [
-  param('id').isMongoId().withMessage('Invalid homework ID')
-];
-
 // Public routes (no authentication required)
 // None for homework - all require authentication
 
@@ -84,20 +70,23 @@ router.post('/',
   homeworkController.createHomework
 );
 
-router.get('/teacher', 
-  authorize('teacher'), 
+router.get('/', 
+  authorize('teacher', 'student'), 
   homeworkController.listHomeworks
 );
 
-router.get('/:id', 
-  mongoIdValidation, 
+router.get('/:id/homeworkid', 
   validate, 
   homeworkController.getHomeworkById
 );
 
+router.get('/:id/classid', 
+  validate, 
+  homeworkController.getHomeworkByClassId
+);
+
 router.put('/:id', 
   authorize('teacher'), 
-  mongoIdValidation, 
   homeworkUpdateValidation, 
   validate, 
   homeworkController.updateHomework
@@ -105,17 +94,12 @@ router.put('/:id',
 
 router.delete('/:id', 
   authorize('teacher'), 
-  mongoIdValidation, 
   validate, 
   homeworkController.deleteHomework
 );
 
 
-// Student routes
-router.get('/', 
-  authorize('student'), 
-  homeworkController.listHomeworks
-);
+
 
 router.get('/upcoming', 
   authorize('student'), 

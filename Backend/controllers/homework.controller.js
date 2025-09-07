@@ -5,7 +5,7 @@ const homeworkService = require('../services/homework.service');
 // @access  Teacher
 const createHomework = async (req, res, next) => {
   try {
-    const homework = await homeworkService.createHomework(req.body);
+    const homework = await homeworkService.createHomework({...req.body, teacherId: req.user._id });
     res.status(201).json({ 
       status: 'success', 
       data: { homework } 
@@ -16,11 +16,26 @@ const createHomework = async (req, res, next) => {
 };
 
 // @desc    Get homework by ID
-// @route   GET /api/homeworks/:id
+// @route   GET /api/homeworks/:id/homeworkid
 // @access  Teacher, Student (if enrolled)
 const getHomeworkById = async (req, res, next) => {
   try {
     const homework = await homeworkService.getHomeworkById(req.params.id);
+    res.status(200).json({ 
+      status: 'success', 
+      data: { homework } 
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get homework by CLassId
+// @route   GET /api/homeworks/:id/classid
+// @access  Teacher, Student (if enrolled)
+const getHomeworkByClassId = async (req, res, next) => {
+  try {
+    const homework = await homeworkService.getHomeworkByClassId(req.params.id);
     res.status(200).json({ 
       status: 'success', 
       data: { homework } 
@@ -38,14 +53,15 @@ const listHomeworks = async (req, res, next) => {
     const filters = {
       ...req.query,
       // Add role-based filtering
-      ...(req.user.role === 'teacher' ? { teacher: req.user.id } : {}),
-      ...(req.user.role === 'student' ? { class: req.user.currentClass } : {})
+      ...(req.user.role === 'teacher' ? { teacherId: req.user._id } : {}),
+      ...(req.user.role === 'student' ? { classId: req.user.currentClass } : {})
     };
     
     const result = await homeworkService.listHomeworks(filters);
     res.status(200).json({ 
       status: 'success', 
-      data: result 
+      data: result,
+      role: req.user.role
     });
   } catch (error) {
     next(error);
@@ -85,20 +101,16 @@ const deleteHomework = async (req, res, next) => {
   }
 };
 
-
-
-
 // @desc    Get upcoming assignments
 // @route   GET /api/homeworks/upcoming
 // @access  Student
 const getUpcomingAssignments = async (req, res, next) => {
   try {
-    const { days = 7 } = req.query;
     const assignments = await homeworkService.listHomeworks({
-      ClassId: req.user.currentClass,
-      sortBy: 'Deadline',
+      classId: req.user.currentClass,
+      sortBy: 'deadline',
       sortOrder: 'asc',
-      limit: 10
+      limit: 4
     });
     
     res.status(200).json({ 
@@ -117,9 +129,9 @@ const getOverdueAssignments = async (req, res, next) => {
   try {
     const now = new Date();
     const assignments = await homeworkService.listHomeworks({
-      ClassId: req.user.currentClass,
-      Deadline: { $lt: now },
-      sortBy: 'Deadline',
+      classId: req.user.currentClass,
+      deadline: { $lt: now },
+      sortBy: 'deadline',
       sortOrder: 'desc',
       limit: 10
     });
@@ -140,5 +152,6 @@ module.exports = {
   updateHomework,
   deleteHomework,
   getUpcomingAssignments,
-  getOverdueAssignments
+  getOverdueAssignments,
+  getHomeworkByClassId
 };

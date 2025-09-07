@@ -387,6 +387,33 @@ const seedDatabase = async () => {
       }
       console.log('✅ Schedules created successfully!');
 
+      const Homework = require('../models/homework.model');
+    // Create schedules for classes
+    console.log('\n📅 Creating homeworks for classes...')
+    const seedHomeworks = [
+        {
+            description: "Bài tập thì quá khứ đơn",
+            classId: "68bbf5293fdcd59a9429ce2a",
+            deadline: "2026-06-07",
+            file: "./src/hw/1",
+            teacherId: teachers[0]._id
+        },
+        {
+            description: "Bài tập thì quá khứ đơn",
+            classId: "68bbf5293fdcd59a9429ce2a",
+            deadline: "2026-06-07",
+            file: "./src/hw/1",
+            teacherId: teachers[1]._id
+        }
+      ];
+      await Homework.deleteMany({});
+      for (const homeworkData of seedHomeworks) {
+        const homework = await Homework.create(homeworkData);
+        console.log(`Created homework for class ${homeworkData.classId} with deadline ${homeworkData.deadline}`);
+        await homework.save();
+      }
+      console.log('✅ Homeworks created successfully!');
+
 
   } catch (error) {
     console.error('Error seeding database:', error);

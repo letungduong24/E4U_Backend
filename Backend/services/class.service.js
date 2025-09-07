@@ -62,6 +62,7 @@ const getClassById = async (classId) => {
   return cls;
 };
 
+
 const updateClass = async (classId, updateData) => {
   // Validate teacher if being updated
   if (updateData.homeroomTeacher) {
