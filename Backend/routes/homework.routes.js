@@ -8,121 +8,66 @@ const router = express.Router();
 
 // Validation rules
 const homeworkCreateValidation = [
-  body('title')
+  body('id')
     .trim()
-    .isLength({ min: 2, max: 200 })
-    .withMessage('Title must be between 2 and 200 characters'),
-  body('description')
+    .isLength({ min: 2, max: 20 })
+    .withMessage('Assignment ID must be between 2 and 20 characters')
+    .matches(/^[A-Z0-9_]+$/)
+    .withMessage('Assignment ID must contain only uppercase letters, numbers, and underscores'),
+  body('Description')
     .trim()
     .isLength({ min: 10, max: 2000 })
     .withMessage('Description must be between 10 and 2000 characters'),
-  body('instructions')
-    .optional()
-    .trim()
-    .isLength({ max: 1000 })
-    .withMessage('Instructions cannot exceed 1000 characters'),
-  body('class')
+  body('ClassId')
     .isMongoId()
-    .withMessage('Valid class ID is required'),
-  body('dueDate')
+    .withMessage('Valid Class ID is required'),
+  body('Deadline')
     .isISO8601()
-    .withMessage('Valid due date is required')
+    .withMessage('Valid deadline is required')
     .custom((value) => {
       if (new Date(value) <= new Date()) {
-        throw new Error('Due date must be in the future');
+        throw new Error('Deadline must be in the future');
       }
       return true;
     }),
-  body('allowLateSubmission')
-    .optional()
-    .isBoolean()
-    .withMessage('allowLateSubmission must be a boolean'),
-  body('maxAttempts')
-    .optional()
-    .isInt({ min: 1, max: 10 })
-    .withMessage('Max attempts must be between 1 and 10'),
-  body('attachments')
+  body('Files')
     .optional()
     .isArray()
-    .withMessage('Attachments must be an array')
+    .withMessage('Files must be an array')
 ];
 
 const homeworkUpdateValidation = [
-  body('title')
+  body('id')
     .optional()
     .trim()
-    .isLength({ min: 2, max: 200 })
-    .withMessage('Title must be between 2 and 200 characters'),
-  body('description')
+    .isLength({ min: 2, max: 20 })
+    .withMessage('Assignment ID must be between 2 and 20 characters')
+    .matches(/^[A-Z0-9_]+$/)
+    .withMessage('Assignment ID must contain only uppercase letters, numbers, and underscores'),
+  body('Description')
     .optional()
     .trim()
     .isLength({ min: 10, max: 2000 })
     .withMessage('Description must be between 10 and 2000 characters'),
-  body('instructions')
-    .optional()
-    .trim()
-    .isLength({ max: 1000 })
-    .withMessage('Instructions cannot exceed 1000 characters'),
-  body('dueDate')
+  body('Deadline')
     .optional()
     .isISO8601()
-    .withMessage('Valid due date is required')
+    .withMessage('Valid deadline is required')
     .custom((value) => {
       if (new Date(value) <= new Date()) {
-        throw new Error('Due date must be in the future');
+        throw new Error('Deadline must be in the future');
       }
       return true;
     }),
-  body('allowLateSubmission')
-    .optional()
-    .isBoolean()
-    .withMessage('allowLateSubmission must be a boolean'),
-  body('maxAttempts')
-    .optional()
-    .isInt({ min: 1, max: 10 })
-    .withMessage('Max attempts must be between 1 and 10'),
-  body('attachments')
+  body('Files')
     .optional()
     .isArray()
-    .withMessage('Attachments must be an array')
+    .withMessage('Files must be an array')
 ];
 
-const submissionValidation = [
-  body('content')
-    .optional()
-    .trim()
-    .isLength({ max: 5000 })
-    .withMessage('Content cannot exceed 5000 characters'),
-  body('attachments')
-    .optional()
-    .isArray()
-    .withMessage('Attachments must be an array'),
-  body('notes')
-    .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage('Notes cannot exceed 500 characters')
-];
-
-const gradeValidation = [
-  body('score')
-    .isInt({ min: 0 })
-    .withMessage('Score must be a non-negative integer'),
-  body('feedback')
-    .optional()
-    .trim()
-    .isLength({ max: 2000 })
-    .withMessage('Feedback cannot exceed 2000 characters'),
-  body('grade')
-    .optional()
-    .trim()
-    .isLength({ max: 10 })
-    .withMessage('Grade cannot exceed 10 characters')
-];
 
 const mongoIdValidation = [
-  param('id').isMongoId().withMessage('Invalid homework ID'),
-  param('submissionId').isMongoId().withMessage('Invalid submission ID')
+  param('id').isMongoId().withMessage('Invalid homework ID')
 ];
 
 // Public routes (no authentication required)
@@ -165,33 +110,6 @@ router.delete('/:id',
   homeworkController.deleteHomework
 );
 
-router.patch('/:id/publish', 
-  authorize('teacher'), 
-  mongoIdValidation, 
-  validate, 
-  homeworkController.publishHomework
-);
-
-router.patch('/:id/close', 
-  authorize('teacher'), 
-  mongoIdValidation, 
-  validate, 
-  homeworkController.closeHomework
-);
-
-router.get('/:id/submissions', 
-  authorize('teacher'), 
-  mongoIdValidation, 
-  validate, 
-  homeworkController.getHomeworkSubmissions
-);
-
-router.get('/:id/analytics', 
-  authorize('teacher'), 
-  mongoIdValidation, 
-  validate, 
-  homeworkController.getHomeworkAnalytics
-);
 
 // Student routes
 router.get('/', 
@@ -209,25 +127,5 @@ router.get('/overdue',
   homeworkController.getOverdueAssignments
 );
 
-router.post('/:id/submit', 
-  authorize('student'), 
-  mongoIdValidation, 
-  submissionValidation, 
-  validate, 
-  homeworkController.submitHomework
-);
-
-router.get('/submissions/student', 
-  authorize('student'), 
-  homeworkController.getStudentSubmissions
-);
-
-// Grading routes (teacher only)
-router.patch('/submissions/:submissionId/grade', 
-  authorize('teacher'), 
-  gradeValidation, 
-  validate, 
-  homeworkController.gradeSubmission
-);
 
 module.exports = router;

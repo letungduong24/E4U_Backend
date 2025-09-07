@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('../models/user.model');
 const Class = require('../models/class.model');
-const StudentClass = require('../models/student_class.model');
 require('dotenv').config();
 
 const seedUsers = [
@@ -290,7 +289,6 @@ const seedDatabase = async () => {
     // Clear existing data
     await User.deleteMany({});
     await Class.deleteMany({});
-    await StudentClass.deleteMany({});
     console.log('Cleared existing data');
 
     // Create seed users
@@ -341,47 +339,7 @@ const seedDatabase = async () => {
     await teachers[0].save();
     await teachers[1].save();
 
-    // Create student enrollments
-    console.log('\n📝 Creating student enrollments...');
-    const enrollments = [];
-    
-    // Enroll students in class 1
-    for (const student of studentsClass1) {
-      const enrollment = await StudentClass.create({
-        student: student._id,
-        class: class1._id,
-        status: 'enrolled',
-        notes: 'Enrolled in IELTS Foundation class'
-      });
-      enrollments.push(enrollment);
-      
-      // Update user enrollment history
-      student.enrollmentHistory = [enrollment._id];
-      await student.save();
-    }
-    
-    // Enroll students in class 2
-    for (const student of studentsClass2) {
-      const enrollment = await StudentClass.create({
-        student: student._id,
-        class: class2._id,
-        status: 'enrolled',
-        notes: 'Enrolled in IELTS Advanced class'
-      });
-      enrollments.push(enrollment);
-      
-      // Update user enrollment history
-      student.enrollmentHistory = [enrollment._id];
-      await student.save();
-    }
-    
-    // Update classes with enrollment references
-    class1.enrollments = enrollments.slice(0, 5).map(e => e._id);
-    class2.enrollments = enrollments.slice(5, 10).map(e => e._id);
-    await class1.save();
-    await class2.save();
-    
-    console.log(`Created ${enrollments.length} student enrollments`);
+    console.log('\n📝 Students assigned to classes successfully!');
 
     // Display created data
     console.log('\n📊 SEED DATA SUMMARY:');
@@ -398,9 +356,6 @@ const seedDatabase = async () => {
       console.log(`   Description: ${cls.description}`);
     });
 
-    console.log('\n📝 ENROLLMENTS:');
-    console.log(`   Total Enrollments: ${enrollments.length}`);
-    console.log(`   Active Enrollments: ${enrollments.filter(e => e.status === 'enrolled').length}`);
 
 
     console.log('\n✅ Database seeded successfully!');

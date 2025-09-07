@@ -12,7 +12,6 @@ const errorHandler = require('./middleware/errorHandler');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const classRoutes = require('./routes/class.routes');
-const studentClassRoutes = require('./routes/student_class.routes');
 const scheduleRoutes = require('./routes/schedule.route');
 const homeworkRoutes = require('./routes/homework.routes');
 const app = express();
@@ -62,7 +61,6 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/classes', classRoutes);
-app.use('/api/student-classes', studentClassRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/homeworks', homeworkRoutes);
 

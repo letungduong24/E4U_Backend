@@ -12,9 +12,6 @@ const classSchema = new mongoose.Schema({
   },
   // Student relationships
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  
-  // Enrollment records
-  enrollments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'StudentClass' }],
     
   // Class metadata
   maxStudents: { type: Number, default: 30 },
