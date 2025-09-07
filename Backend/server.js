@@ -13,6 +13,7 @@ const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const classRoutes = require('./routes/class.routes');
 const scheduleRoutes = require('./routes/schedule.route');
+const scheduleViewRoutes = require('./routes/schedule-view.routes');
 const homeworkRoutes = require('./routes/homework.routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -62,6 +63,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/schedules', scheduleRoutes);
+app.use('/api/schedule-view', scheduleViewRoutes);
 app.use('/api/homeworks', homeworkRoutes);
 
 
