@@ -17,9 +17,8 @@ const homeworkSchema = new mongoose.Schema({
     required: [true, 'Deadline is required']
   },
   file: {
-    type: String,
-    trim: true,
-    required: true
+    fileName: String,
+    filePath: String,
   },
   teacherId: {
     type: mongoose.Schema.Types.ObjectId,

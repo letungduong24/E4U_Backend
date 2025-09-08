@@ -395,14 +395,20 @@ const seedDatabase = async () => {
             description: "Bài tập thì quá khứ đơn",
             classId: "68bbf5293fdcd59a9429ce2a",
             deadline: "2026-06-07",
-            file: "./src/hw/1",
+            file: {
+              fileName: "baitap1.pdf",
+              filePath: "./src/hw/1.pdf"
+            },
             teacherId: teachers[0]._id
         },
         {
             description: "Bài tập thì quá khứ đơn",
             classId: "68bbf5293fdcd59a9429ce2a",
             deadline: "2026-06-07",
-            file: "./src/hw/1",
+            file: {
+              fileName: "baitap2.pdf",
+              filePath: "./src/hw/2.pdf"
+            },
             teacherId: teachers[1]._id
         }
       ];
