@@ -5,9 +5,14 @@ const validate = require('../middleware/validate');
 
 const router = express.Router();
 
-// Protect all class routes and allow only admin role
-router.use(protect, authorize('admin'));
-router.post('/', scheduleController.createSchedule, validate);
-router.post('/period', scheduleController.createPeriod, validate);
+router.use(protect); 
+router.get('/my-schedule', scheduleController.mySchedule);
+router.use('/upcoming', scheduleController.upcomingSchedulesForUser);
+
+router.use(authorize('admin'));
+router.post('/', validate, scheduleController.createSchedule);
+router.get('/:id', scheduleController.listSchedulesByClassId);
+router.put('/:id', validate, scheduleController.updateSchedule);
+router.delete('/:id', scheduleController.deleteSchedule);
 
 module.exports = router;
