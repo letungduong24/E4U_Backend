@@ -12,9 +12,6 @@ const homeworkCreateValidation = [
     .trim()
     .isLength({ min: 10, max: 2000 })
     .withMessage('Description must be between 10 and 2000 characters'),
-  body('classId')
-    .isMongoId()
-    .withMessage('Valid Class ID is required'),
   body('deadline')
     .isISO8601()
     .withMessage('Valid deadline is required')

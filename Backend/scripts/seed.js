@@ -367,21 +367,19 @@ const seedDatabase = async () => {
     const seedSchedules = [
         {
           class: class1._id,  
-          startDate: new Date('2025-09-08T08:00:00'),
-          endDate: new Date('2025-09-08T09:00:00'),
+          day: "2025-09-08",
+          period: "08:00-09:00"
         },
         {
           class: class2._id,
-          startDate: new Date('2025-09-08T09:10:00'),
-          endDate: new Date('2025-09-08T10:10:00'),
+          day: "2025-09-09",
+          period: "08:00-09:00",
         }
       ];
       await Schedule.deleteMany({});
       for (const schedData of seedSchedules) {
         const schedule = await Schedule.create(schedData);
-        console.log(`   Created schedule for class ${schedData.class} on ${schedData.startDate.toDateString()}`);
-        schedule.periods.push({ time: '08:00-09:00' });
-        schedule.periods.push({ time: '09:10-10:10' });
+        console.log(`   Created schedule for class ${schedData.class} on ${schedData.day} at ${schedData.period}`);
         await schedule.save();
         console.log(`   Created period for schedule ${schedule._id}`);
       }

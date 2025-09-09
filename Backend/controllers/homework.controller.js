@@ -5,7 +5,11 @@ const homeworkService = require('../services/homework.service');
 // @access  Teacher
 const createHomework = async (req, res, next) => {
   try {
-    const homework = await homeworkService.createHomework({...req.body, teacherId: req.user._id });
+    const user = req.user;
+    if (user.role !== 'teacher') {
+      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+    } 
+    const homework = await homeworkService.createHomework({...req.body, teacherId: user._id, classId: user.teachingClass });
     res.status(201).json({ 
       status: 'success', 
       data: { homework } 

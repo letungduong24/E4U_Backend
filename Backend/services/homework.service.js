@@ -11,7 +11,7 @@ const createHomework = async (payload) => {
     file,
     teacherId
   } = payload;
-
+  console.log(payload)
   const classDoc = await Class.findById(classId);
   if (!classDoc) throw new Error('Class not found');
 
