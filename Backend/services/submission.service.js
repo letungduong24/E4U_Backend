@@ -23,7 +23,6 @@ const createSubmission = async (payload) => {
     homeworkId,
     studentId,
     file,
-    submittedAt: new Date(),
     status: "submitted",
   });
   
@@ -48,11 +47,7 @@ const updateSubmission = async (submissionId, updateData) => {
   
   const updatedSubmission = await Submission.findByIdAndUpdate(
     submissionId,
-    { 
-      ...updateData, 
-      submittedAt: new Date(),
-      updatedAt: new Date() 
-    },
+    updateData,
     { new: true, runValidators: true }
   );
   
@@ -84,114 +79,20 @@ const gradeSubmission = async (submissionId, teacherId, { grade, feedback }) => 
   return submission;
 };
 
-// Lấy danh sách học sinh đã nộp và chưa nộp bài tập
-const getSubmissionStatusByHomework = async (homeworkId) => {
 
-  const homework = await Homework.findById(homeworkId).populate("classId", "name code");
-  if (!homework) {
-    throw new Error("Homework not found");
-  }
-
-  const students = await User.find({
-    currentClass: homework.classId._id,
-    role: "student",
-  }).select("_id name email");
-  
-  
-  const submissions = await Submission.find({ homeworkId }).populate("studentId", "name email");
-  
- 
-  const submissionMap = new Map();
-  submissions.forEach((sub) => {
-    submissionMap.set(sub.studentId._id.toString(), sub);
-  });
-  
-  // Phân loại học sinh
-  const submittedStudents = [];
-  const notSubmittedStudents = [];
-  
-  students.forEach((student) => {
-    const submission = submissionMap.get(student._id.toString());
-    
-    if (submission) {
-
-      submittedStudents.push({
-        student: {
-          _id: student._id,
-          name: student.name,
-          email: student.email,
-        },
-        submission: {
-          _id: submission._id,
-          file: submission.file,
-          submittedAt: submission.submittedAt,
-          status: submission.status,
-          grade: submission.grade,
-          feedback: submission.feedback,
-          gradedAt: submission.gradedAt,
-        },
-      });
-    } else {
- 
-      notSubmittedStudents.push({
-        student: {
-          _id: student._id,
-          name: student.name,
-          email: student.email,
-        },
-        submission: null,
-      });
-    }
-  });
-  
-  return {
-    homework: {
-      _id: homework._id,
-      description: homework.description,
-      deadline: homework.deadline,
-      class: homework.classId,
-    },
-    statistics: {
-      totalStudents: students.length,
-      submittedCount: submittedStudents.length,
-      notSubmittedCount: notSubmittedStudents.length,
-      submissionRate: students.length > 0 
-        ? Math.round((submittedStudents.length / students.length) * 100) 
-        : 0,
-    },
-    submittedStudents,
-    notSubmittedStudents,
-  };
-};
-
-
-const getStudentSubmissions = async (studentId, { page = 1, limit = 10, status }) => {
+//xem cac bai minh nop
+const getStudentSubmissions = async (studentId, { status }) => {
   const query = { studentId };
   if (status) query.status = status;
   
-  const skip = (Number(page) - 1) * Number(limit);
+  const submissions = await Submission.find(query)
+    .populate("homeworkId", "description deadline classId")
+    .sort({ submittedAt: -1 });
   
-  const [submissions, total] = await Promise.all([
-    Submission.find(query)
-      .populate("homeworkId", "description deadline classId")
-      .skip(skip)
-      .limit(Number(limit))
-      .sort({ submittedAt: -1 }),
-    Submission.countDocuments(query)
-  ]);
-  
-  return {
-    submissions,
-    pagination: {
-      page: Number(page),
-      limit: Number(limit),
-      total,
-      totalPages: Math.ceil(total / Number(limit)) || 1
-    }
-  };
+  return submissions;
 };
 
-
+// xem chi tiet bai da nop
 const getSubmissionById = async (submissionId) => {
   const submission = await Submission.findById(submissionId);
   
@@ -202,11 +103,52 @@ const getSubmissionById = async (submissionId) => {
   return submission;
 };
 
+// Lấy danh sách submission theo classId
+const getSubmissionsByClassId = async (classId, { status, homeworkId } = {}) => {
+  // Tìm tất cả homework của class này
+  const homeworks = await Homework.find({ classId }).select('_id');
+  const homeworkIds = homeworks.map(hw => hw._id);
+  
+  if (homeworkIds.length === 0) {
+    return [];
+  }
+  
+  // Build query
+  const query = { homeworkId: { $in: homeworkIds } };
+  if (status) query.status = status;
+  if (homeworkId) query.homeworkId = homeworkId;
+  
+  const submissions = await Submission.find(query)
+    .populate("studentId", "name email")
+    .populate("homeworkId", "description deadline classId")
+    .sort({ createdAt: -1 });
+  
+  return submissions;
+};
+
+// Lấy submissions theo homework ID
+const getSubmissionsByHomeworkId = async (homeworkId) => {
+  const homework = await Homework.findById(homeworkId).populate("classId", "name code");
+  if (!homework) {
+    throw new Error("Homework not found");
+  }
+
+  const submissions = await Submission.find({ homeworkId })
+    .populate("studentId", "name email")
+    .sort({ createdAt: -1 });
+  
+  return {
+    homework,
+    submissions
+  };
+};
+
 module.exports = {
   createSubmission,
   updateSubmission,
   gradeSubmission,
-  getSubmissionStatusByHomework,
   getStudentSubmissions,
-  getSubmissionById
+  getSubmissionById,
+  getSubmissionsByClassId,
+  getSubmissionsByHomeworkId
 };

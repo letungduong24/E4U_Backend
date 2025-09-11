@@ -58,6 +58,7 @@ const gradeValidation = [
 // Protected routes
 router.use(protect);
 
+
 // Student routes
 router.post('/',
   authorize('student'),
@@ -88,14 +89,26 @@ router.post('/:id/grade',
   submissionController.gradeSubmission
 );
 
-router.get('/homework/:homeworkId/status',
+router.get('/class/:classId',
+  authorize('teacher'),
+  [
+    param('classId').isMongoId().withMessage('Valid class ID is required'),
+    query('status').optional().isIn(['submitted', 'graded']).withMessage('Status must be submitted or graded'),
+    query('homeworkId').optional().isMongoId().withMessage('Valid homework ID is required')
+  ],
+  validate,
+  submissionController.getSubmissionsByClassId
+);
+
+router.get('/homework/:homeworkId',
   authorize('teacher'),
   [
     param('homeworkId').isMongoId().withMessage('Valid homework ID is required')
   ],
   validate,
-  submissionController.getSubmissionStatusByHomework
+  submissionController.getSubmissionsByHomeworkId
 );
+
 
 // Shared routes (Student and Teacher)
 router.get('/:id',
