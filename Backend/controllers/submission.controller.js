@@ -2,12 +2,12 @@ const submissionService = require('../services/submission.service');
 
 // @desc    Create submission
 // @route   POST /api/submissions
-// @access  Student
+// @access  Student only
 const createSubmission = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can create submissions' });
     }
     
     const submission = await submissionService.createSubmission({
@@ -30,16 +30,17 @@ const createSubmission = async (req, res, next) => {
 
 // @desc    Update submission
 // @route   PUT /api/submissions/:id
-// @access  Student
+// @access  Student only (owner)
 const updateSubmission = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can update submissions' });
     }
     
     const submission = await submissionService.updateSubmission(
       req.params.id,
+      user._id, // Truyền studentId để kiểm tra ownership
       {
         file: req.file ? {
           fileName: req.file.originalname,
@@ -88,12 +89,12 @@ const gradeSubmission = async (req, res, next) => {
 
 // @desc    Get student submissions
 // @route   GET /api/submissions/student
-// @access  Student
+// @access  Student only (own submissions)
 const getStudentSubmissions = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can view their submissions' });
     }
     
     const { status } = req.query;
@@ -116,12 +117,15 @@ const getStudentSubmissions = async (req, res, next) => {
 const getSubmissionById = async (req, res, next) => {
   try {
     const user = req.user;
-    const submission = await submissionService.getSubmissionById(req.params.id);
     
-    // Kiểm tra quyền truy cập
-    if (user.role === 'student' && submission.studentId._id.toString() !== user._id.toString()) {
-      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+    // Kiểm tra role - chỉ student và teacher được phép
+    if (user.role !== 'student' && user.role !== 'teacher') {
+      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students and teachers can view submissions' });
     }
+    
+    // Truyền studentId nếu user là student để kiểm tra ownership trong service
+    const studentId = user.role === 'student' ? user._id : null;
+    const submission = await submissionService.getSubmissionById(req.params.id, studentId);
     
     res.status(200).json({
       status: 'success',
@@ -132,45 +136,40 @@ const getSubmissionById = async (req, res, next) => {
   }
 };
 
-// @desc    Get submissions by class ID
-// @route   GET /api/submissions/class/:classId
-// @access  Teacher
-const getSubmissionsByClassId = async (req, res, next) => {
+// @desc    Get homework and submission by homework ID for student
+// @route   GET /api/submissions/homework/:homeworkId/student
+// @access  Student only (own submission)
+const getSubmissionByHomeworkIdForStudent = async (req, res, next) => {
   try {
     const user = req.user;
-    if (user.role !== 'teacher') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+    if (user.role !== 'student') {
+      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can view homework submissions' });
     }
     
-    const { classId } = req.params;
-    const { status, homeworkId } = req.query;
-    
-    const submissions = await submissionService.getSubmissionsByClassId(classId, {
-      status,
-      homeworkId
-    });
+    const { homeworkId } = req.params;
+    const result = await submissionService.getSubmissionByHomeworkIdForStudent(homeworkId, user._id);
     
     res.status(200).json({
       status: 'success',
-      data: { submissions }
+      data: result
     });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Get submissions by homework ID
-// @route   GET /api/submissions/homework/:homeworkId
-// @access  Teacher
-const getSubmissionsByHomeworkId = async (req, res, next) => {
+// @desc    Get all submissions by homework ID for teacher
+// @route   GET /api/submissions/homework/:homeworkId/teacher
+// @access  Teacher only (own homework)
+const getSubmissionsByHomeworkIdForTeacher = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'teacher') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+      return res.status(403).json({ status: 'fail', message: 'Access denied - Only teachers can view all submissions' });
     }
     
     const { homeworkId } = req.params;
-    const result = await submissionService.getSubmissionsByHomeworkId(homeworkId);
+    const result = await submissionService.getSubmissionsByHomeworkIdForTeacher(homeworkId, user._id);
     
     res.status(200).json({
       status: 'success',
@@ -187,6 +186,6 @@ module.exports = {
   gradeSubmission,
   getStudentSubmissions,
   getSubmissionById,
-  getSubmissionsByClassId,
-  getSubmissionsByHomeworkId
+  getSubmissionByHomeworkIdForStudent,
+  getSubmissionsByHomeworkIdForTeacher
 };

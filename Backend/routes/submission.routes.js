@@ -89,26 +89,23 @@ router.post('/:id/grade',
   submissionController.gradeSubmission
 );
 
-router.get('/class/:classId',
-  authorize('teacher'),
+router.get('/homework/:homeworkId/student',
+  authorize('student'),
   [
-    param('classId').isMongoId().withMessage('Valid class ID is required'),
-    query('status').optional().isIn(['submitted', 'graded']).withMessage('Status must be submitted or graded'),
-    query('homeworkId').optional().isMongoId().withMessage('Valid homework ID is required')
+    param('homeworkId').isMongoId().withMessage('Valid homework ID is required')
   ],
   validate,
-  submissionController.getSubmissionsByClassId
+  submissionController.getSubmissionByHomeworkIdForStudent
 );
 
-router.get('/homework/:homeworkId',
+router.get('/homework/:homeworkId/teacher',
   authorize('teacher'),
   [
     param('homeworkId').isMongoId().withMessage('Valid homework ID is required')
   ],
   validate,
-  submissionController.getSubmissionsByHomeworkId
+  submissionController.getSubmissionsByHomeworkIdForTeacher
 );
-
 
 // Shared routes (Student and Teacher)
 router.get('/:id',

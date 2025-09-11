@@ -15,10 +15,6 @@ const submissionSchema = new mongoose.Schema({
     fileName: String,
     filePath: String
   },
-  submittedAt: {
-    type: Date,
-    default: Date.now
-  },
   status: {
     type: String,
     enum: ['submitted', 'graded'],
