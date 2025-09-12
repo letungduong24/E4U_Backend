@@ -85,6 +85,40 @@ const login = async (email, password) => {
   user.lastLogin = new Date();
   await user.save();
 
+  // Populate currentClass and teachingClass before returning
+  await user.populate({
+    path: 'currentClass',
+    select: 'name code description homeroomTeacher isActive'
+  });
+  
+  if (user.currentClass && user.currentClass.homeroomTeacher) {
+    await user.populate({
+      path: 'currentClass.homeroomTeacher',
+      select: 'firstName lastName'
+    });
+  }
+
+  await user.populate({
+    path: 'teachingClass',
+    select: 'name code description homeroomTeacher isActive'
+  });
+
+  console.log('🔍 Login user with populated classes:', {
+    id: user._id,
+    name: user.fullName,
+    currentClass: user.currentClass ? {
+      id: user.currentClass._id,
+      name: user.currentClass.name,
+      code: user.currentClass.code,
+      homeroomTeacher: user.currentClass.homeroomTeacher
+    } : null,
+    teachingClass: user.teachingClass ? {
+      id: user.teachingClass._id,
+      name: user.teachingClass.name,
+      code: user.teachingClass.code
+    } : null
+  });
+
   return user;
 };
 

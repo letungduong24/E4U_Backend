@@ -10,11 +10,6 @@ const createSubmission = async (payload) => {
   const homework = await Homework.findById(homeworkId).populate("classId", "name code");
   if (!homework) throw new Error("Homework not found");
   
-  // Lấy thông tin student để kiểm tra lớp
-  const User = require("../models/user.model");
-  const student = await User.findById(studentId).select("currentClass");
-  if (!student) throw new Error("Student not found");
-  
   // Kiểm tra student có thuộc lớp của homework không
   if (student.currentClass.toString() !== homework.classId._id.toString()) {
     throw new Error("You can only submit homework for your own class");
@@ -38,7 +33,6 @@ const createSubmission = async (payload) => {
     homeworkId,
     studentId,
     file,
-    status: "submitted",
   });
   
   await submission.populate("studentId", "name email");
