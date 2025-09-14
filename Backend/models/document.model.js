@@ -28,30 +28,10 @@ const documentSchema = new mongoose.Schema({
       type: String,
       required: [true, 'File name is required']
     },
-    originalName: {
-      type: String,
-      required: [true, 'Original file name is required']
-    },
     filePath: {
       type: String,
       required: [true, 'File path is required']
-    },
-    fileSize: {
-      type: Number,
-      required: [true, 'File size is required']
-    },
-    mimeType: {
-      type: String,
-      required: [true, 'MIME type is required']
     }
-  },
-  uploadDate: {
-    type: Date,
-    default: Date.now
-  },
-  lastModified: {
-    type: Date,
-    default: Date.now
   },
   isActive: {
     type: Boolean,
@@ -64,34 +44,20 @@ const documentSchema = new mongoose.Schema({
 // Index for better query performance
 documentSchema.index({ classId: 1 });
 documentSchema.index({ teacherId: 1 });
-documentSchema.index({ uploadDate: -1 });
 documentSchema.index({ title: 'text', description: 'text' });
 
 // Static method to find documents by class
 documentSchema.statics.findByClass = function(classId) {
   return this.find({ classId: classId, isActive: true })
     .populate('classId', 'name code')
-    .sort({ uploadDate: -1 });
+    .sort({ createdAt: -1 });
 };
 
 // Static method to find documents by teacher
 documentSchema.statics.findByTeacher = function(teacherId) {
   return this.find({ teacherId: teacherId, isActive: true })
     .populate('classId', 'name code')
-    .sort({ uploadDate: -1 });
+    .sort({ createdAt: -1 });
 };
-
-
-// Pre-save middleware to update lastModified
-documentSchema.pre('save', function(next) {
-  this.lastModified = new Date();
-  next();
-});
-
-// Pre-update middleware to update lastModified
-documentSchema.pre(['updateOne', 'findOneAndUpdate'], function(next) {
-  this.set({ lastModified: new Date() });
-  next();
-});
 
 module.exports = mongoose.model('Document', documentSchema);
