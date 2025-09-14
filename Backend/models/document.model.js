@@ -24,14 +24,8 @@ const documentSchema = new mongoose.Schema({
     required: [true, 'Teacher ID is required']
   },
   file: {
-    fileName: {
-      type: String,
-      required: [true, 'File name is required']
-    },
-    filePath: {
-      type: String,
-      required: [true, 'File path is required']
-    }
+    fileName: String,
+    filePath: String,
   },
   isActive: {
     type: Boolean,
