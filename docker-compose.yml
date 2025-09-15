@@ -2,11 +2,11 @@ services:
   e4u_backend:
     build: .
     ports:
-      - 3000:3000
+      - ${PORT}:${PORT}
+    env_file:
+      - .env 
     environment:
-      - PORT=3000
-      - NODE_ENV=production
-      - MONGODB_URI=mongodb://root:password@mongodb:27017/classmanagement?authSource=admin
+      - MONGODB_URI=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongodb:27017/e4u?authSource=admin
     volumes:
       - .:/app
       - /app/node_modules
@@ -20,8 +20,8 @@ services:
     image: mongo
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - e4u
     ports:
