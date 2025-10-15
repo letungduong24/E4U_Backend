@@ -36,13 +36,6 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'student', 'teacher'],
     default: 'student'
   },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-  lastLogin: Date,
   profile: {
     avatar: {
       type: String,
@@ -63,12 +56,9 @@ const userSchema = new mongoose.Schema({
       trim: true,
       maxlength: [100, 'Address cannot be more than 100 characters']
     },
-    preferences: {
-      notifications: {
-        email: { type: Boolean, default: true },
-        push: { type: Boolean, default: true },
-        sms: { type: Boolean, default: false }
-      },
+    notification: {
+      type: Boolean,
+      default: false
     }
   },
   // Class relationships

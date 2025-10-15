@@ -2,67 +2,64 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 
 const protect = async (req, res, next) => {
-  let token;
-
-  // Check for token in cookies first, then headers
-  if (req.cookies.token) {
-    token = req.cookies.token;
-  } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-  }
-
-  if (!token) {
-    return res.status(401).json({
-      status: 'error',
-      message: 'Not authorized to access this route'
-    });
-  }
-
   try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Lấy token từ header Authorization
+    const authHeader = req.headers.authorization;
 
-    // Get user from token
-    const user = await User.findById(decoded.id).select('-password');
-    
-    if (!user) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         status: 'error',
-        message: 'User not found'
+        message: 'Authorization token missing or invalid format',
       });
     }
 
-    // Check if user is active
+    const token = authHeader.split(' ')[1];
+
+    // Giải mã token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Tìm user theo id trong token
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'User not found',
+      });
+    }
+
+    // Kiểm tra tài khoản bị vô hiệu hoá
     if (!user.isActive) {
       return res.status(401).json({
         status: 'error',
-        message: 'User account is deactivated'
+        message: 'User account is deactivated',
       });
     }
 
     req.user = user;
     next();
-  } catch (error) {
+  } catch (err) {
+    console.error('Auth error:', err);
     return res.status(401).json({
       status: 'error',
-      message: 'Not authorized to access this route'
+      message: 'Not authorized to access this route',
     });
   }
 };
 
+// Middleware kiểm tra quyền truy cập theo vai trò
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
         status: 'error',
-        message: 'Not authorized to access this route'
+        message: 'Not authorized to access this route',
       });
     }
 
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         status: 'error',
-        message: `User role ${req.user.role} is not authorized to access this route`
+        message: `User role ${req.user.role} is not authorized to access this route`,
       });
     }
 
@@ -70,7 +67,4 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = {
-  protect,
-  authorize
-};
+module.exports = { protect, authorize };

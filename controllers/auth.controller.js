@@ -6,7 +6,10 @@ const authService = require('../services/auth.service');
 const register = async (req, res, next) => {
   try {
     const user = await authService.register(req.body);
-    authService.sendTokenResponse(user, 201, res);
+    res.status(200).json({
+      status: 'success',
+      data: user
+    });
   } catch (error) {
     next(error);
   }
@@ -19,7 +22,10 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await authService.login(email, password);
-    authService.sendTokenResponse(user, 200, res);
+    res.status(200).json({
+      status: 'success',
+      data: user
+    });
   } catch (error) {
     next(error);
   }
@@ -78,7 +84,12 @@ const changePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
     const user = await authService.changePassword(req.user.id, currentPassword, newPassword);
-    authService.sendTokenResponse(user, 200, res);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -115,7 +126,12 @@ const resetPassword = async (req, res, next) => {
     const { resettoken } = req.params;
     
     const user = await authService.resetPassword(resettoken, newPassword);
-    authService.sendTokenResponse(user, 200, res);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        user
+      }
+    });
   } catch (error) {
     next(error);
   }
