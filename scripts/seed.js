@@ -4,7 +4,6 @@ const Class = require('../models/class.model');
 require('dotenv').config();
 
 const seedUsers = [
-  // Admin
   {
     firstName: 'Admin',
     lastName: 'User',
@@ -14,13 +13,7 @@ const seedUsers = [
     profile: {
       phone: '+1234567890',
       gender: 'Nam',
-      preferences: {
-        notifications: {
-          email: true,
-          push: true,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   // Teachers
@@ -34,13 +27,7 @@ const seedUsers = [
       phone: '+1234567891',
       gender: 'Nam',
       address: '123 Đường ABC, Quận 1, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: true,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -53,13 +40,7 @@ const seedUsers = [
       phone: '+1234567892',
       gender: 'Nữ',
       address: '456 Đường XYZ, Quận 2, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: true,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   // Students
@@ -73,13 +54,7 @@ const seedUsers = [
       phone: '+1234567893',
       gender: 'Nam',
       address: '789 Đường DEF, Quận 3, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -92,13 +67,7 @@ const seedUsers = [
       phone: '+1234567894',
       gender: 'Nữ',
       address: '321 Đường GHI, Quận 4, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -111,13 +80,7 @@ const seedUsers = [
       phone: '+1234567895',
       gender: 'Nam',
       address: '654 Đường JKL, Quận 5, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -130,13 +93,7 @@ const seedUsers = [
       phone: '+1234567896',
       gender: 'Nữ',
       address: '987 Đường MNO, Quận 6, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -149,13 +106,7 @@ const seedUsers = [
       phone: '+1234567897',
       gender: 'Nam',
       address: '147 Đường PQR, Quận 7, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -168,13 +119,7 @@ const seedUsers = [
       phone: '+1234567898',
       gender: 'Nữ',
       address: '258 Đường STU, Quận 8, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -187,13 +132,7 @@ const seedUsers = [
       phone: '+1234567899',
       gender: 'Nam',
       address: '369 Đường VWX, Quận 9, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -206,13 +145,7 @@ const seedUsers = [
       phone: '+1234567800',
       gender: 'Nữ',
       address: '741 Đường YZA, Quận 10, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -225,13 +158,7 @@ const seedUsers = [
       phone: '+1234567801',
       gender: 'Nam',
       address: '852 Đường BCD, Quận 11, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   },
   {
@@ -244,13 +171,7 @@ const seedUsers = [
       phone: '+1234567802',
       gender: 'Nữ',
       address: '963 Đường EFG, Quận 12, TP.HCM',
-      preferences: {
-        notifications: {
-          email: true,
-          push: false,
-          sms: false
-        },
-      }
+      notification: true
     }
   }
 ];

@@ -82,7 +82,6 @@ userSchema.virtual('fullName').get(function() {
 
 // Index for better query performance
 userSchema.index({ role: 1 });
-userSchema.index({ isActive: 1 });
 userSchema.index({ createdAt: -1 });
 
 // Pre-save middleware to hash password
@@ -116,9 +115,6 @@ userSchema.statics.findByEmail = function(email) {
   return this.findOne({ email: email.toLowerCase() });
 };
 
-// Static method to find active users
-userSchema.statics.findActive = function() {
-  return this.find({ isActive: true });
-};
+
 
 module.exports = mongoose.model('User', userSchema);
