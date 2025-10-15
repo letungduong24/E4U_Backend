@@ -1,6 +1,7 @@
 services:
   e4u_backend:
     build: .
+    command: sh -c "npm run seed && npm run dev"
     ports:
       - ${PORT}:${PORT}
     env_file:
