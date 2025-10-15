@@ -38,10 +38,6 @@ const login = async (email, password) => {
     throw new Error('Invalid credentials');
   }
 
-  if (!user.isActive) {
-    throw new Error('Account is deactivated');
-  }
-
   if (!(await user.matchPassword(password))) {
     throw new Error('Invalid credentials');
   }
