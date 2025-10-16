@@ -62,6 +62,20 @@ const login = async (email, password) => {
     select: 'name code description homeroomTeacher isActive'
   });
 
+  // Populate enrollmentHistory with full class details
+  await user.populate({
+    path: 'enrollmentHistory',
+    select: 'status enrolledAt completedAt droppedAt notes',
+    populate: {
+      path: 'class',
+      select: 'name code description homeroomTeacher maxStudents isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName email'
+      }
+    }
+  });
+
   const token = generateToken(user._id);
   return {user, token}
 };
@@ -86,6 +100,26 @@ const getMe = async (userId) => {
       populate: {
         path: 'homeroomTeacher',
         select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
       }
     });
   

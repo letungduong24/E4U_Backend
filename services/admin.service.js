@@ -8,7 +8,39 @@ const listUsers = async ({ page = 1, limit = 10, role, isActive }) => {
 
   const skip = (Number(page) - 1) * Number(limit);
   const [items, total] = await Promise.all([
-    User.find(query).select('-password').skip(skip).limit(Number(limit)).sort({ createdAt: -1 }),
+    User.find(query)
+      .select('-password')
+      .populate({
+        path: 'currentClass',
+        select: 'name code description homeroomTeacher isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName'
+        }
+      })
+      .populate({
+        path: 'teachingClass',
+        select: 'name code description homeroomTeacher isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName'
+        }
+      })
+      .populate({
+        path: 'enrollmentHistory',
+        select: 'status enrolledAt completedAt droppedAt notes',
+        populate: {
+          path: 'class',
+          select: 'name code description homeroomTeacher maxStudents isActive',
+          populate: {
+            path: 'homeroomTeacher',
+            select: 'firstName lastName email'
+          }
+        }
+      })
+      .skip(skip)
+      .limit(Number(limit))
+      .sort({ createdAt: -1 }),
     User.countDocuments(query)
   ]);
 
@@ -22,7 +54,36 @@ const listUsers = async ({ page = 1, limit = 10, role, isActive }) => {
 };
 
 const getUserById = async (userId) => {
-  const user = await User.findById(userId).select('-password');
+  const user = await User.findById(userId)
+    .select('-password')
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
+      }
+    });
   if (!user) throw new Error('User not found');
   return user;
 };
@@ -38,7 +99,36 @@ const updateUserByAdmin = async (userId, updateData) => {
     userId,
     payload,
     { new: true, runValidators: true }
-  ).select('-password');
+  )
+    .select('-password')
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
+      }
+    });
 
   if (!user) throw new Error('User not found');
   return user;
@@ -55,7 +145,36 @@ const setUserActiveStatus = async (userId, isActive) => {
     userId,
     { isActive },
     { new: true, runValidators: true }
-  ).select('-password');
+  )
+    .select('-password')
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
+      }
+    });
   if (!user) throw new Error('User not found');
   return user;
 };
