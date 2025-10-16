@@ -1,5 +1,6 @@
 const User = require('../models/user.model');
 const ClassModel = require('../models/class.model');
+const StudentClass = require('../models/student_class.model');
 
 // Class management
 const createClass = async (payload) => {
@@ -90,6 +91,10 @@ const deleteClass = async (classId) => {
 };
 
 const addStudents = async (classId, studentIds = []) => {
+  // Validate class exists
+  const cls = await ClassModel.findById(classId);
+  if (!cls) throw new Error('Class not found');
+  
   // Validate all users are students
   const users = await User.find({ _id: { $in: studentIds } }, '_id role');
   const invalidUsers = users.filter(u => u.role !== 'student');
@@ -99,41 +104,111 @@ const addStudents = async (classId, studentIds = []) => {
   
   const existingIds = users.map(s => s._id);
   
-  // Add students to class
-  const cls = await ClassModel.findByIdAndUpdate(
+  // Check class capacity
+  const currentEnrollments = await StudentClass.countDocuments({ 
+    class: classId, 
+    status: 'enrolled' 
+  });
+  if (currentEnrollments + existingIds.length > cls.maxStudents) {
+    throw new Error('Adding these students would exceed class capacity');
+  }
+  
+  // Create StudentClass records for each student
+  const studentClassRecords = [];
+  for (const studentId of existingIds) {
+    // Check if student already enrolled
+    const existingEnrollment = await StudentClass.findOne({ 
+      student: studentId, 
+      class: classId 
+    });
+    
+    if (existingEnrollment) {
+      if (existingEnrollment.status === 'enrolled') {
+        continue; // Skip already enrolled students
+      }
+      // Re-enroll if dropped
+      existingEnrollment.status = 'enrolled';
+      existingEnrollment.enrolledAt = new Date();
+      existingEnrollment.droppedAt = null;
+      await existingEnrollment.save();
+      studentClassRecords.push(existingEnrollment);
+    } else {
+      // Check if student has active enrollment elsewhere
+      const currentEnrollment = await StudentClass.findOne({ 
+        student: studentId, 
+        status: 'enrolled' 
+      });
+      if (currentEnrollment) {
+        throw new Error(`Student ${studentId} is already enrolled in another class`);
+      }
+      
+      // Create new enrollment
+      const enrollment = await StudentClass.create({
+        student: studentId,
+        class: classId,
+        status: 'enrolled',
+        enrolledAt: new Date()
+      });
+      studentClassRecords.push(enrollment);
+    }
+    
+    // Update student's current class and enrollment history
+    const lastRecord = studentClassRecords[studentClassRecords.length - 1];
+    await User.findByIdAndUpdate(studentId, {
+      currentClass: classId,
+      $addToSet: { enrollmentHistory: lastRecord._id }
+    });
+  }
+  
+  // Update class with students and enrollments
+  const enrollmentIds = studentClassRecords.map(sc => sc._id);
+  const updatedClass = await ClassModel.findByIdAndUpdate(
     classId,
-    { $addToSet: { students: { $each: existingIds } } },
+    { 
+      $addToSet: { 
+        students: { $each: existingIds },
+        enrollments: { $each: enrollmentIds }
+      } 
+    },
     { new: true }
   ).populate('homeroomTeacher', 'firstName lastName email role')
    .populate('students', 'firstName lastName email role');
-  if (!cls) throw new Error('Class not found');
 
-  // Add class to students
-  await User.updateMany(
-    { _id: { $in: existingIds } },
-    { $addToSet: { classes: classId } }
-  );
-
-  return cls;
+  return updatedClass;
 };
 
 const removeStudents = async (classId, studentIds = []) => {
+  // Validate class exists
+  const cls = await ClassModel.findById(classId);
+  if (!cls) throw new Error('Class not found');
+  
+  // Update StudentClass records to dropped status
+  const enrollments = await StudentClass.find({ 
+    class: classId, 
+    student: { $in: studentIds },
+    status: 'enrolled'
+  });
+  
+  for (const enrollment of enrollments) {
+    enrollment.status = 'dropped';
+    enrollment.droppedAt = new Date();
+    await enrollment.save();
+    
+    // Remove current class from student
+    await User.findByIdAndUpdate(enrollment.student, {
+      $unset: { currentClass: 1 }
+    });
+  }
+  
   // Remove students from class
-  const cls = await ClassModel.findByIdAndUpdate(
+  const updatedClass = await ClassModel.findByIdAndUpdate(
     classId,
     { $pull: { students: { $in: studentIds } } },
     { new: true }
   ).populate('homeroomTeacher', 'firstName lastName email role')
    .populate('students', 'firstName lastName email role');
-  if (!cls) throw new Error('Class not found');
 
-  // Remove class from students
-  await User.updateMany(
-    { _id: { $in: studentIds } },
-    { $pull: { classes: classId } }
-  );
-
-  return cls;
+  return updatedClass;
 };
 
 module.exports = {

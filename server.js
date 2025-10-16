@@ -16,6 +16,7 @@ const scheduleRoutes = require("./routes/schedule.route");
 const homeworkRoutes = require("./routes/homework.routes");
 const submissionRoutes = require("./routes/submission.routes");
 const documentRoutes = require("./routes/document.routes");
+const studentClassRoutes = require('./routes/student_class.routes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -66,6 +67,8 @@ app.use("/api/schedules", scheduleRoutes);
 app.use("/api/homeworks", homeworkRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/api/student-classes", studentClassRoutes);
+
 
 // 404 handler
 app.use('*', (req, res) => {

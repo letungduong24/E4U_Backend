@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/user.model');
 const Class = require('../models/class.model');
+const StudentClass = require('../models/student_class.model');
 require('dotenv').config();
 
 const seedUsers = [
@@ -210,6 +211,7 @@ const seedDatabase = async () => {
     // Clear existing data
     await User.deleteMany({});
     await Class.deleteMany({});
+    await StudentClass.deleteMany({});
     console.log('Cleared existing data');
 
     // Create seed users
@@ -235,24 +237,50 @@ const seedDatabase = async () => {
     
     // Assign first 5 students to class 1
     const studentsClass1 = students.slice(0, 5);
+    const studentsClass2 = students.slice(5, 10);
+
+    // Create StudentClass records for class 1
+    const studentClassRecords1 = [];
+    for (const student of studentsClass1) {
+      const studentClassRecord = await StudentClass.create({
+        student: student._id,
+        class: class1._id,
+        status: 'enrolled',
+        enrolledAt: new Date()
+      });
+      studentClassRecords1.push(studentClassRecord);
+      
+      // Update student's current class and enrollment history
+      student.currentClass = class1._id;
+      student.enrollmentHistory.push(studentClassRecord._id);
+      await student.save();
+    }
+
+    // Create StudentClass records for class 2
+    const studentClassRecords2 = [];
+    for (const student of studentsClass2) {
+      const studentClassRecord = await StudentClass.create({
+        student: student._id,
+        class: class2._id,
+        status: 'enrolled',
+        enrolledAt: new Date()
+      });
+      studentClassRecords2.push(studentClassRecord);
+      
+      // Update student's current class and enrollment history
+      student.currentClass = class2._id;
+      student.enrollmentHistory.push(studentClassRecord._id);
+      await student.save();
+    }
+
+    // Update class enrollments
     class1.students = studentsClass1.map(s => s._id);
+    class1.enrollments = studentClassRecords1.map(sc => sc._id);
     await class1.save();
 
-    // Assign next 5 students to class 2
-    const studentsClass2 = students.slice(5, 10);
     class2.students = studentsClass2.map(s => s._id);
+    class2.enrollments = studentClassRecords2.map(sc => sc._id);
     await class2.save();
-
-    // Update user current class relationships
-    for (const student of studentsClass1) {
-      student.currentClass = class1._id;
-      await student.save();
-    }
-
-    for (const student of studentsClass2) {
-      student.currentClass = class2._id;
-      await student.save();
-    }
 
     // Update teacher teaching classes
     teachers[0].teachingClass = class1._id;
@@ -260,7 +288,8 @@ const seedDatabase = async () => {
     await teachers[0].save();
     await teachers[1].save();
 
-    console.log('\n📝 Students assigned to classes successfully!');
+    console.log(`\n📝 Created ${studentClassRecords1.length + studentClassRecords2.length} StudentClass records`);
+    console.log('📝 Students assigned to classes successfully!');
 
     // Display created data
     console.log('\n📊 SEED DATA SUMMARY:');
@@ -274,7 +303,17 @@ const seedDatabase = async () => {
     createdClasses.forEach(cls => {
       console.log(`📚 ${cls.name} (${cls.code}) - Teacher: ${cls.homeroomTeacher}`);
       console.log(`   Students: ${cls.students.length}/${cls.maxStudents} students`);
+      console.log(`   Enrollments: ${cls.enrollments.length} StudentClass records`);
       console.log(`   Description: ${cls.description}`);
+    });
+
+    console.log('\n📋 STUDENT-CLASS ENROLLMENTS:');
+    const allStudentClasses = await StudentClass.find({})
+      .populate('student', 'firstName lastName email')
+      .populate('class', 'name code');
+    
+    allStudentClasses.forEach(sc => {
+      console.log(`👤 ${sc.student.firstName} ${sc.student.lastName} → 📚 ${sc.class.name} (${sc.class.code}) - Status: ${sc.status}`);
     });
 
 
