@@ -7,18 +7,13 @@ const listUsers = async ({ role, classId, q }) => {
   const query = {};
   if (role) query.role = role;
   
-  // Handle search by name and classId filter
-  const searchConditions = [];
-  
   // Handle search by name
   if (q) {
-    searchConditions.push({
-      $or: [
-        { firstName: new RegExp(q, 'i') },
-        { lastName: new RegExp(q, 'i') },
-        { email: new RegExp(q, 'i') }
-      ]
-    });
+    query.$or = [
+      { firstName: new RegExp(q, 'i') },
+      { lastName: new RegExp(q, 'i') },
+      { email: new RegExp(q, 'i') }
+    ];
   }
   
   // Handle classId filter - filter users by class (either as current class or teaching class)
@@ -30,17 +25,25 @@ const listUsers = async ({ role, classId, q }) => {
     
     // Convert string to ObjectId
     const objectIdClassId = new mongoose.Types.ObjectId(classId);
-    searchConditions.push({
-      $or: [
+    
+    // If we already have $or from search, we need to combine with classId filter
+    if (query.$or) {
+      // User has both search and classId filter
+      query.$and = [
+        { $or: query.$or }, // Search conditions
+        { $or: [
+          { currentClass: objectIdClassId },
+          { teachingClass: objectIdClassId }
+        ]} // ClassId conditions
+      ];
+      delete query.$or; // Remove the original $or
+    } else {
+      // Only classId filter
+      query.$or = [
         { currentClass: objectIdClassId },
         { teachingClass: objectIdClassId }
-      ]
-    });
-  }
-  
-  // Combine search conditions
-  if (searchConditions.length > 0) {
-    query.$and = searchConditions;
+      ];
+    }
   }
 
   const users = await User.find(query)
