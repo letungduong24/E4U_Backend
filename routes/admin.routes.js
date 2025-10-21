@@ -20,6 +20,7 @@ router.use(protect, authorize('admin'));
 
 // User management routes
 router.get('/users', adminController.listUsers);
+router.post('/users', adminController.createUser);
 router.get('/users/:id', adminController.getUserById);
 router.put('/users/:id', adminController.updateUserByAdmin);
 router.delete('/users/:id', adminController.deleteUser);

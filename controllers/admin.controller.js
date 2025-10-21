@@ -18,6 +18,22 @@ const listUsers = async (req, res, next) => {
   }
 };
 
+// @desc    Create user (admin)
+// @route   POST /api/admin/users
+// @access  Admin
+const createUser = async (req, res, next) => {
+  try {
+    const user = await adminService.createUser(req.body);
+    res.status(201).json({
+      status: 'success',
+      message: 'User created successfully',
+      data: { user }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get user by id (admin)
 // @route   GET /api/admin/users/:id
 // @access  Admin
@@ -157,6 +173,7 @@ const getClassById = async (req, res, next) => {
 
 module.exports = {
   listUsers,
+  createUser,
   getUserById,
   updateUserByAdmin,
   deleteUser,

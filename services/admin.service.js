@@ -1,5 +1,6 @@
 const User = require('../models/user.model');
 const Class = require('../models/class.model');
+const authService = require('./auth.service');
 const mongoose = require('mongoose');
 
 // User management
@@ -79,6 +80,68 @@ const listUsers = async ({ role, classId, q }) => {
     .sort({ createdAt: -1 });
 
   return users;
+};
+
+// Create user by admin (reuse auth service)
+const createUser = async (userData) => {
+  const { role, profile, ...registerData } = userData;
+  
+  // Use auth service register function
+  const { user, token } = await authService.register(registerData);
+  
+  // Update role and profile if provided
+  if (role || profile) {
+    const updateData = {};
+    if (role) updateData.role = role;
+    if (profile) {
+      // Validate profile fields according to user model
+      const validProfile = {};
+      if (profile.phone) validProfile['profile.phone'] = profile.phone;
+      if (profile.dateOfBirth) validProfile['profile.dateOfBirth'] = profile.dateOfBirth;
+      if (profile.gender) validProfile['profile.gender'] = profile.gender;
+      if (profile.address) validProfile['profile.address'] = profile.address;
+      if (profile.notification !== undefined) validProfile['profile.notification'] = profile.notification;
+      if (profile.avatar) validProfile['profile.avatar'] = profile.avatar;
+      
+      Object.assign(updateData, validProfile);
+    }
+    
+    await User.findByIdAndUpdate(user._id, updateData);
+  }
+  
+  // Return user with full populate (without token)
+  const userWithPopulate = await User.findById(user._id)
+    .select('-password')
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
+      }
+    });
+  
+  return userWithPopulate;
 };
 
 const getUserById = async (userId) => {
@@ -388,6 +451,7 @@ const getClassesWithoutTeacher = async () => {
 module.exports = {
   // user
   listUsers,
+  createUser,
   getUserById,
   updateUserByAdmin,
   deleteUser,
