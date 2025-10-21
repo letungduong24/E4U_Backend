@@ -32,33 +32,21 @@ const createClass = async (payload) => {
   return classDoc;
 };
 
-const listClasses = async ({ page = 1, limit = 10, teacher, q }) => {
+const listClasses = async ({ teacher, q }) => {
   const query = {};
   if (teacher) query.homeroomTeacher = teacher;
   if (q) query.$or = [{ name: new RegExp(q, 'i') }, { code: new RegExp(q, 'i') }];
-  const skip = (Number(page) - 1) * Number(limit);
-  const [items, total] = await Promise.all([
-    ClassModel.find(query)
-      .populate('homeroomTeacher', 'firstName lastName email role')
-      .populate('students', 'firstName lastName email role')
-      .skip(skip)
-      .limit(Number(limit))
-      .sort({ createdAt: -1 }),
-    ClassModel.countDocuments(query)
-  ]);
-  return {
-    items,
-    page: Number(page),
-    limit: Number(limit),
-    total,
-    totalPages: Math.ceil(total / Number(limit)) || 1
-  };
+  
+  const classes = await ClassModel.find(query)
+    .populate('homeroomTeacher', 'firstName lastName email role')
+    .sort({ createdAt: -1 });
+  
+  return classes;
 };
 
 const getClassById = async (classId) => {
   const cls = await ClassModel.findById(classId)
-    .populate('homeroomTeacher', 'firstName lastName email role')
-    .populate('students', 'firstName lastName email role');
+    .populate('homeroomTeacher', 'firstName lastName email role');
   if (!cls) throw new Error('Class not found');
   return cls;
 };

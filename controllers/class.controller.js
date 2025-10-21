@@ -17,9 +17,9 @@ const createClass = async (req, res, next) => {
 // @access  Admin
 const listClasses = async (req, res, next) => {
   try {
-    const { page, limit, teacher, q } = req.query;
-    const result = await classService.listClasses({ page, limit, teacher, q });
-    res.status(200).json({ status: 'success', data: result });
+    const { teacher, q } = req.query;
+    const classes = await classService.listClasses({ teacher, q });
+    res.status(200).json({ status: 'success', data: { classes } });
   } catch (error) {
     next(error);
   }
