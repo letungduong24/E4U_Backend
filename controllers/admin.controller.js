@@ -6,10 +6,11 @@ const classService = require('../services/class.service');
 // @access  Admin
 const listUsers = async (req, res, next) => {
   try {
-    const { role, classId } = req.query;
+    const { role, classId, q } = req.query;
     const users = await adminService.listUsers({
       role,
-      classId
+      classId,
+      q
     });
     res.status(200).json({ status: 'success', data: { users } });
   } catch (error) {

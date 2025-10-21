@@ -3,9 +3,23 @@ const Class = require('../models/class.model');
 const mongoose = require('mongoose');
 
 // User management
-const listUsers = async ({ role, classId }) => {
+const listUsers = async ({ role, classId, q }) => {
   const query = {};
   if (role) query.role = role;
+  
+  // Handle search by name and classId filter
+  const searchConditions = [];
+  
+  // Handle search by name
+  if (q) {
+    searchConditions.push({
+      $or: [
+        { firstName: new RegExp(q, 'i') },
+        { lastName: new RegExp(q, 'i') },
+        { email: new RegExp(q, 'i') }
+      ]
+    });
+  }
   
   // Handle classId filter - filter users by class (either as current class or teaching class)
   if (classId) {
@@ -16,10 +30,17 @@ const listUsers = async ({ role, classId }) => {
     
     // Convert string to ObjectId
     const objectIdClassId = new mongoose.Types.ObjectId(classId);
-    query.$or = [
-      { currentClass: objectIdClassId },
-      { teachingClass: objectIdClassId }
-    ];
+    searchConditions.push({
+      $or: [
+        { currentClass: objectIdClassId },
+        { teachingClass: objectIdClassId }
+      ]
+    });
+  }
+  
+  // Combine search conditions
+  if (searchConditions.length > 0) {
+    query.$and = searchConditions;
   }
 
   const users = await User.find(query)
