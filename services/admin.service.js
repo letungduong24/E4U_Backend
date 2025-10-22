@@ -1,6 +1,7 @@
 const User = require('../models/user.model');
 const Class = require('../models/class.model');
 const authService = require('./auth.service');
+const studentClassService = require('./student_class.service');
 const mongoose = require('mongoose');
 
 // User management
@@ -90,26 +91,27 @@ const createUser = async (userData) => {
   const { user, token } = await authService.register(registerData);
   
   // Update role and profile if provided
-  if (role || profile) {
-    const updateData = {};
-    if (role) updateData.role = role;
-    if (profile) {
-      // Validate profile fields according to user model
-      const validProfile = {};
-      if (profile.phone) validProfile['profile.phone'] = profile.phone;
-      if (profile.dateOfBirth) validProfile['profile.dateOfBirth'] = profile.dateOfBirth;
-      if (profile.gender) validProfile['profile.gender'] = profile.gender;
-      if (profile.address) validProfile['profile.address'] = profile.address;
-      if (profile.notification !== undefined) validProfile['profile.notification'] = profile.notification;
-      if (profile.avatar) validProfile['profile.avatar'] = profile.avatar;
-      
-      Object.assign(updateData, validProfile);
-    }
+  const updateData = {};
+  if (role) updateData.role = role;
+  if (profile) {
+    // Validate profile fields according to user model
+    const validProfile = {};
+    if (profile.phone) validProfile['profile.phone'] = profile.phone;
+    if (profile.dateOfBirth) validProfile['profile.dateOfBirth'] = profile.dateOfBirth;
+    if (profile.gender) validProfile['profile.gender'] = profile.gender;
+    if (profile.address) validProfile['profile.address'] = profile.address;
+    if (profile.notification !== undefined) validProfile['profile.notification'] = profile.notification;
+    if (profile.avatar) validProfile['profile.avatar'] = profile.avatar;
     
+    Object.assign(updateData, validProfile);
+  }
+  
+  // Update user with all data
+  if (Object.keys(updateData).length > 0) {
     await User.findByIdAndUpdate(user._id, updateData);
   }
   
-  // Return user with full populate (without token)
+  // Return user with full populate (without token) - refresh after updates
   const userWithPopulate = await User.findById(user._id)
     .select('-password')
     .populate({
@@ -180,10 +182,24 @@ const getUserById = async (userId) => {
 };
 
 const updateUserByAdmin = async (userId, updateData) => {
-  const allowedFields = ['firstName', 'lastName', 'role', 'isActive', 'email'];
+  const { profile, ...otherData } = updateData;
+  
+  // Handle basic fields (không cho phép thay đổi role)
+  const allowedFields = ['firstName', 'lastName', 'isActive', 'email'];
   const payload = {};
   for (const key of allowedFields) {
-    if (Object.prototype.hasOwnProperty.call(updateData, key)) payload[key] = updateData[key];
+    if (Object.prototype.hasOwnProperty.call(otherData, key)) payload[key] = otherData[key];
+  }
+  
+  // Handle profile fields
+  if (profile) {
+    // Validate profile fields according to user model
+    if (profile.phone) payload['profile.phone'] = profile.phone;
+    if (profile.dateOfBirth) payload['profile.dateOfBirth'] = profile.dateOfBirth;
+    if (profile.gender) payload['profile.gender'] = profile.gender;
+    if (profile.address) payload['profile.address'] = profile.address;
+    if (profile.notification !== undefined) payload['profile.notification'] = profile.notification;
+    if (profile.avatar) payload['profile.avatar'] = profile.avatar;
   }
 
   const user = await User.findByIdAndUpdate(

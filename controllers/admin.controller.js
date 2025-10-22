@@ -171,6 +171,57 @@ const getClassById = async (req, res, next) => {
   }
 };
 
+// @desc    Transfer student to new class (admin)
+// @route   POST /api/admin/students/:studentId/transfer
+// @access  Admin
+const transferStudent = async (req, res, next) => {
+  try {
+    const { newClassId, notes } = req.body;
+    const result = await studentClassService.transferStudent(req.params.studentId, newClassId, notes);
+    res.status(200).json({
+      status: 'success',
+      message: 'Student transferred successfully',
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Enroll student in class (admin)
+// @route   POST /api/admin/students/:studentId/enroll
+// @access  Admin
+const enrollStudent = async (req, res, next) => {
+  try {
+    const enrollment = await studentClassService.enrollStudent({
+      student: req.params.studentId,
+      ...req.body
+    });
+    res.status(201).json({
+      status: 'success',
+      message: 'Student enrolled successfully',
+      data: { enrollment }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get student enrollment history (admin)
+// @route   GET /api/admin/students/:studentId/history
+// @access  Admin
+const getStudentHistory = async (req, res, next) => {
+  try {
+    const history = await studentClassService.getStudentHistory(req.params.studentId);
+    res.status(200).json({
+      status: 'success',
+      data: { history }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   listUsers,
   createUser,
@@ -185,7 +236,11 @@ module.exports = {
   getClassesWithoutTeacher,
   // Class management
   listClasses,
-  getClassById
+  getClassById,
+  // Student enrollment management
+  transferStudent,
+  enrollStudent,
+  getStudentHistory
 };
 
 

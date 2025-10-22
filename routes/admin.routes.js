@@ -15,6 +15,7 @@ const setUserActiveValidation = [
   body('isActive').isBoolean().withMessage('isActive must be a boolean value')
 ];
 
+
 // Protect all admin routes and allow only admin role
 router.use(protect, authorize('admin'));
 
