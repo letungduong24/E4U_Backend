@@ -242,8 +242,17 @@ const updateUserByAdmin = async (userId, updateData) => {
 };
 
 const deleteUser = async (userId) => {
-  const user = await User.findByIdAndDelete(userId);
+  // Check if user exists first
+  const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
+  
+  // Prevent deletion of admin users
+  if (user.role === 'admin') {
+    throw new Error('Cannot delete admin users');
+  }
+  
+  // Delete the user
+  await User.findByIdAndDelete(userId);
   return { message: 'User deleted' };
 };
 
@@ -297,5 +306,4 @@ module.exports = {
   deleteUser,
   setUserActiveStatus
 };
-
 
