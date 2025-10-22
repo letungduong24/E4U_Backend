@@ -1,4 +1,5 @@
 const classService = require('../services/class.service');
+const studentClassService = require('../services/student_class.service');
 
 // @desc    Create class
 // @route   POST /api/classes
@@ -85,6 +86,117 @@ const removeStudents = async (req, res, next) => {
   }
 };
 
+// @desc    Transfer student to new class
+// @route   POST /api/classes/transfer
+// @access  Admin
+const transferStudent = async (req, res, next) => {
+  try {
+    const { studentId, newClassId, notes } = req.body;
+    const result = await studentClassService.transferStudent(studentId, newClassId, notes);
+    res.status(200).json({
+      status: 'success',
+      message: 'Student transferred successfully',
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Enroll student in class
+// @route   POST /api/classes/enroll
+// @access  Admin
+const enrollStudent = async (req, res, next) => {
+  try {
+    const enrollment = await studentClassService.enrollStudent(req.body);
+    res.status(201).json({
+      status: 'success',
+      message: 'Student enrolled successfully',
+      data: { enrollment }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get student enrollment history
+// @route   GET /api/classes/students/:studentId/history
+// @access  Admin
+const getStudentHistory = async (req, res, next) => {
+  try {
+    const history = await studentClassService.getStudentHistory(req.params.studentId);
+    res.status(200).json({
+      status: 'success',
+      data: { history }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Set homeroom teacher for class
+// @route   POST /api/classes/:id/teacher
+// @access  Admin
+const setHomeroomTeacher = async (req, res, next) => {
+  try {
+    const { teacherId } = req.body;
+    const teacher = await classService.setTeacherClass(teacherId, req.params.id);
+    res.status(200).json({
+      status: 'success',
+      message: 'Homeroom teacher assigned successfully',
+      data: { teacher }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove homeroom teacher from class
+// @route   DELETE /api/classes/:id/teacher
+// @access  Admin
+const removeHomeroomTeacher = async (req, res, next) => {
+  try {
+    const teacher = await classService.removeTeacherFromClass(req.params.teacherId);
+    res.status(200).json({
+      status: 'success',
+      message: 'Homeroom teacher removed successfully',
+      data: { teacher }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get unassigned teachers
+// @route   GET /api/classes/teachers/unassigned
+// @access  Admin
+const getUnassignedTeachers = async (req, res, next) => {
+  try {
+    const teachers = await classService.getUnassignedTeachers();
+    res.status(200).json({
+      status: 'success',
+      data: { teachers }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get classes without homeroom teachers
+// @route   GET /api/classes/without-teacher
+// @access  Admin
+const getClassesWithoutTeacher = async (req, res, next) => {
+  try {
+    const classes = await classService.getClassesWithoutTeacher();
+    res.status(200).json({
+      status: 'success',
+      data: { classes }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createClass,
   listClasses,
@@ -92,5 +204,14 @@ module.exports = {
   updateClass,
   deleteClass,
   addStudents,
-  removeStudents
+  removeStudents,
+  // Student enrollment management
+  transferStudent,
+  enrollStudent,
+  getStudentHistory,
+  // Homeroom teacher management
+  setHomeroomTeacher,
+  removeHomeroomTeacher,
+  getUnassignedTeachers,
+  getClassesWithoutTeacher
 };

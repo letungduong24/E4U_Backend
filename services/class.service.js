@@ -199,6 +199,183 @@ const removeStudents = async (classId, studentIds = []) => {
   return updatedClass;
 };
 
+// Set teaching class for teacher
+const setTeacherClass = async (teacherId, classId) => {
+  // Validate teacher exists and is a teacher
+  const teacher = await User.findById(teacherId);
+  if (!teacher) throw new Error('Teacher not found');
+  if (teacher.role !== 'teacher') throw new Error('User is not a teacher');
+  
+  // Check if teacher already has a teaching class
+  if (teacher.teachingClass) {
+    throw new Error('Teacher is already assigned to a class. Please remove from current class first.');
+  }
+  
+  // Validate class exists
+  const classDoc = await ClassModel.findById(classId);
+  if (!classDoc) throw new Error('Class not found');
+  if (!classDoc.isActive) throw new Error('Class is not active');
+  
+  // Check if class already has a homeroom teacher
+  if (classDoc.homeroomTeacher && classDoc.homeroomTeacher.toString() !== teacherId) {
+    throw new Error('Class already has a homeroom teacher');
+  }
+  
+  // Update teacher's teaching class
+  const updatedTeacher = await User.findByIdAndUpdate(
+    teacherId,
+    { teachingClass: classId },
+    { new: true, runValidators: true }
+  )
+    .select('-password')
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
+      }
+    });
+  
+  // Update class homeroom teacher
+  await ClassModel.findByIdAndUpdate(classId, {
+    homeroomTeacher: teacherId
+  });
+  
+  return updatedTeacher;
+};
+
+// Remove teacher from class
+const removeTeacherFromClass = async (teacherId) => {
+  // Validate teacher exists
+  const teacher = await User.findById(teacherId);
+  if (!teacher) throw new Error('Teacher not found');
+  if (teacher.role !== 'teacher') throw new Error('User is not a teacher');
+  
+  if (!teacher.teachingClass) {
+    throw new Error('Teacher is not assigned to any class');
+  }
+  
+  // Remove teacher from class
+  await ClassModel.findByIdAndUpdate(teacher.teachingClass, {
+    $unset: { homeroomTeacher: 1 }
+  });
+  
+  // Remove teaching class from teacher
+  const updatedTeacher = await User.findByIdAndUpdate(
+    teacherId,
+    { $unset: { teachingClass: 1 } },
+    { new: true, runValidators: true }
+  )
+    .select('-password')
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
+      }
+    });
+  
+  return updatedTeacher;
+};
+
+// Get teachers without assigned classes
+const getUnassignedTeachers = async () => {
+  const teachers = await User.find({
+    role: 'teacher',
+    teachingClass: { $exists: false }
+  })
+    .select('-password')
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
+      }
+    })
+    .sort({ createdAt: -1 });
+  
+  return teachers;
+};
+
+// Get classes without homeroom teachers
+const getClassesWithoutTeacher = async () => {
+  const classes = await ClassModel.find({
+    $or: [
+      { homeroomTeacher: { $exists: false } },
+      { homeroomTeacher: null }
+    ],
+    isActive: true
+  })
+    .populate('homeroomTeacher', 'firstName lastName email role')
+    .populate('students', 'firstName lastName email role')
+    .sort({ createdAt: -1 });
+  
+  return classes;
+};
+
 module.exports = {
   createClass,
   listClasses,
@@ -206,5 +383,10 @@ module.exports = {
   updateClass,
   deleteClass,
   addStudents,
-  removeStudents
+  removeStudents,
+  // Homeroom teacher management
+  setTeacherClass,
+  removeTeacherFromClass,
+  getUnassignedTeachers,
+  getClassesWithoutTeacher
 };

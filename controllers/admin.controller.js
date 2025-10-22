@@ -83,68 +83,6 @@ const setUserActiveStatus = async (req, res, next) => {
   }
 };
 
-// @desc    Set teaching class for teacher
-// @route   POST /api/admin/teachers/:id/class
-// @access  Admin
-const setTeacherClass = async (req, res, next) => {
-  try {
-    const { classId } = req.body;
-    const teacher = await adminService.setTeacherClass(req.params.id, classId);
-    res.status(200).json({
-      status: 'success',
-      message: 'Teacher assigned to class successfully',
-      data: { teacher }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Remove teacher from class
-// @route   DELETE /api/admin/teachers/:id/class
-// @access  Admin
-const removeTeacherFromClass = async (req, res, next) => {
-  try {
-    const teacher = await adminService.removeTeacherFromClass(req.params.id);
-    res.status(200).json({
-      status: 'success',
-      message: 'Teacher removed from class successfully',
-      data: { teacher }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Get unassigned teachers
-// @route   GET /api/admin/teachers/unassigned
-// @access  Admin
-const getUnassignedTeachers = async (req, res, next) => {
-  try {
-    const teachers = await adminService.getUnassignedTeachers();
-    res.status(200).json({
-      status: 'success',
-      data: { teachers }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Get classes without teachers
-// @route   GET /api/admin/classes/without-teacher
-// @access  Admin
-const getClassesWithoutTeacher = async (req, res, next) => {
-  try {
-    const classes = await adminService.getClassesWithoutTeacher();
-    res.status(200).json({
-      status: 'success',
-      data: { classes }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 // @desc    List classes (admin)
 // @route   GET /api/admin/classes
@@ -171,56 +109,6 @@ const getClassById = async (req, res, next) => {
   }
 };
 
-// @desc    Transfer student to new class (admin)
-// @route   POST /api/admin/students/:studentId/transfer
-// @access  Admin
-const transferStudent = async (req, res, next) => {
-  try {
-    const { newClassId, notes } = req.body;
-    const result = await studentClassService.transferStudent(req.params.studentId, newClassId, notes);
-    res.status(200).json({
-      status: 'success',
-      message: 'Student transferred successfully',
-      data: result
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Enroll student in class (admin)
-// @route   POST /api/admin/students/:studentId/enroll
-// @access  Admin
-const enrollStudent = async (req, res, next) => {
-  try {
-    const enrollment = await studentClassService.enrollStudent({
-      student: req.params.studentId,
-      ...req.body
-    });
-    res.status(201).json({
-      status: 'success',
-      message: 'Student enrolled successfully',
-      data: { enrollment }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Get student enrollment history (admin)
-// @route   GET /api/admin/students/:studentId/history
-// @access  Admin
-const getStudentHistory = async (req, res, next) => {
-  try {
-    const history = await studentClassService.getStudentHistory(req.params.studentId);
-    res.status(200).json({
-      status: 'success',
-      data: { history }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 module.exports = {
   listUsers,
@@ -229,18 +117,9 @@ module.exports = {
   updateUserByAdmin,
   deleteUser,
   setUserActiveStatus,
-  // Teacher class management
-  setTeacherClass,
-  removeTeacherFromClass,
-  getUnassignedTeachers,
-  getClassesWithoutTeacher,
   // Class management
   listClasses,
   getClassById,
-  // Student enrollment management
-  transferStudent,
-  enrollStudent,
-  getStudentHistory
 };
 
 

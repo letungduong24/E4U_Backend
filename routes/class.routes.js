@@ -18,6 +18,22 @@ const classUpdateValidation = [
   body('students').optional().isArray(),
 ];
 
+const transferStudentValidation = [
+  body('studentId').isMongoId().withMessage('Valid student ID is required'),
+  body('newClassId').isMongoId().withMessage('Valid new class ID is required'),
+  body('notes').optional().isString().withMessage('Notes must be a string')
+];
+
+const enrollStudentValidation = [
+  body('student').isMongoId().withMessage('Valid student ID is required'),
+  body('class').isMongoId().withMessage('Valid class ID is required'),
+  body('notes').optional().isString().withMessage('Notes must be a string')
+];
+
+const setTeacherValidation = [
+  body('teacherId').isMongoId().withMessage('Valid teacher ID is required')
+];
+
 // Protect all class routes and allow only admin role
 router.use(protect, authorize('admin'));
 
@@ -29,5 +45,16 @@ router.put('/:id', classUpdateValidation, validate, classController.updateClass)
 router.delete('/:id', classController.deleteClass);
 router.post('/:id/students', validate, classController.addStudents);
 router.delete('/:id/students', validate, classController.removeStudents);
+
+// Student enrollment management routes
+router.post('/transfer', transferStudentValidation, validate, classController.transferStudent);
+router.post('/enroll', enrollStudentValidation, validate, classController.enrollStudent);
+router.get('/students/:studentId/history', classController.getStudentHistory);
+
+// Homeroom teacher management routes
+router.post('/:id/teacher', setTeacherValidation, validate, classController.setHomeroomTeacher);
+router.delete('/:id/teacher/:teacherId', classController.removeHomeroomTeacher);
+router.get('/teachers/unassigned', classController.getUnassignedTeachers);
+router.get('/without-teacher', classController.getClassesWithoutTeacher);
 
 module.exports = router;
