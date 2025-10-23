@@ -140,11 +140,11 @@ const getStudentHistory = async (req, res, next) => {
 const setHomeroomTeacher = async (req, res, next) => {
   try {
     const { teacherId } = req.body;
-    const teacher = await classService.setTeacherClass(teacherId, req.params.id);
+    const classData = await classService.setTeacherClass(teacherId, req.params.id);
     res.status(200).json({
       status: 'success',
       message: 'Homeroom teacher assigned successfully',
-      data: { teacher }
+      data: { class: classData }
     });
   } catch (error) {
     next(error);
@@ -156,11 +156,11 @@ const setHomeroomTeacher = async (req, res, next) => {
 // @access  Admin
 const removeHomeroomTeacher = async (req, res, next) => {
   try {
-    const teacher = await classService.removeTeacherFromClass(req.params.teacherId);
+    const classData = await classService.removeTeacherFromClassByClassId(req.params.id);
     res.status(200).json({
       status: 'success',
       message: 'Homeroom teacher removed successfully',
-      data: { teacher }
+      data: { class: classData }
     });
   } catch (error) {
     next(error);

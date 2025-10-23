@@ -52,7 +52,7 @@ router.get('/students/:studentId/history', classController.getStudentHistory);
 
 // Homeroom teacher management routes
 router.post('/:id/teacher', setTeacherValidation, validate, classController.setHomeroomTeacher);
-router.delete('/:id/teacher/:teacherId', classController.removeHomeroomTeacher);
+router.delete('/:id/teacher', classController.removeHomeroomTeacher);
 router.get('/teachers/unassigned', classController.getUnassignedTeachers);
 router.get('/without-teacher', classController.getClassesWithoutTeacher);
 

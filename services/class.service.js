@@ -241,12 +241,16 @@ const setTeacherClass = async (teacherId, classId) => {
       }
     });
   
-  // Update class homeroom teacher
-  await ClassModel.findByIdAndUpdate(classId, {
-    homeroomTeacher: teacherId
-  });
+  // Update class homeroom teacher and get updated class
+  const updatedClass = await ClassModel.findByIdAndUpdate(
+    classId, 
+    { homeroomTeacher: teacherId },
+    { new: true, runValidators: true }
+  )
+    .populate('homeroomTeacher', 'firstName lastName email role')
+    .populate('students', 'firstName lastName email role');
   
-  return updatedTeacher;
+  return updatedClass;
 };
 
 // Remove teacher from class
@@ -302,6 +306,37 @@ const removeTeacherFromClass = async (teacherId) => {
     });
   
   return updatedTeacher;
+};
+
+// Remove teacher from class by class ID
+const removeTeacherFromClassByClassId = async (classId) => {
+  // Validate class exists and get current homeroom teacher
+  const classDoc = await ClassModel.findById(classId);
+  if (!classDoc) throw new Error('Class not found');
+  
+  if (!classDoc.homeroomTeacher) {
+    throw new Error('Class does not have a homeroom teacher');
+  }
+  
+  const teacherId = classDoc.homeroomTeacher;
+  
+  // Remove teacher from class and get updated class
+  const updatedClass = await ClassModel.findByIdAndUpdate(
+    classId,
+    { $unset: { homeroomTeacher: 1 } },
+    { new: true, runValidators: true }
+  )
+    .populate('homeroomTeacher', 'firstName lastName email role')
+    .populate('students', 'firstName lastName email role');
+  
+  // Remove teaching class from teacher
+  await User.findByIdAndUpdate(
+    teacherId,
+    { $unset: { teachingClass: 1 } },
+    { new: true, runValidators: true }
+  );
+  
+  return updatedClass;
 };
 
 // Get teachers without assigned classes
@@ -371,6 +406,7 @@ module.exports = {
   // Homeroom teacher management
   setTeacherClass,
   removeTeacherFromClass,
+  removeTeacherFromClassByClassId,
   getUnassignedTeachers,
   getClassesWithoutTeacher
 };
