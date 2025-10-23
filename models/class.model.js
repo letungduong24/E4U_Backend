@@ -8,7 +8,6 @@ const classSchema = new mongoose.Schema({
   homeroomTeacher: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
-    required: true 
   },
   // Student relationships
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
