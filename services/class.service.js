@@ -10,8 +10,6 @@ const createClass = async (payload) => {
     name,
     code,
     description,
-    homeroomTeacher,
-    students,
     maxStudents,
     isActive
   });
