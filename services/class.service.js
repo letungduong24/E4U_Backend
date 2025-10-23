@@ -4,21 +4,7 @@ const StudentClass = require('../models/student_class.model');
 
 // Class management
 const createClass = async (payload) => {
-  const { name, code, description, homeroomTeacher, students = [], maxStudents = 30, isActive = true } = payload;
-  
-  // Validate teacher
-  const teacher = await User.findById(homeroomTeacher);
-  if (!teacher) throw new Error('Homeroom teacher not found');
-  if (teacher.role !== 'teacher') throw new Error('User is not a teacher');
-  
-  // Validate students (if provided)
-  if (students.length > 0) {
-    const studentDocs = await User.find({ _id: { $in: students } });
-    const invalidStudents = studentDocs.filter(s => s.role !== 'student');
-    if (invalidStudents.length > 0) {
-      throw new Error('Some users are not students');
-    }
-  }
+  const { name, code, description, maxStudents = 30, isActive = true } = payload;
   
   const classDoc = await ClassModel.create({
     name,

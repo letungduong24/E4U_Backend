@@ -9,7 +9,6 @@ const router = express.Router();
 const classCreateValidation = [
   body('name').trim().isLength({ min: 2 }).withMessage('Name is required'),
   body('code').trim().isLength({ min: 2 }).withMessage('Code is required'),
-  body('students').optional().isArray(),
 ];
 
 const classUpdateValidation = [
