@@ -17,6 +17,14 @@ const classUpdateValidation = [
   body('students').optional().isArray(),
 ];
 
+const addStudentValidation = [
+  body('studentId').isMongoId().withMessage('Valid student ID is required')
+];
+
+const removeStudentValidation = [
+  body('studentId').isMongoId().withMessage('Valid student ID is required')
+];
+
 const transferStudentValidation = [
   body('studentId').isMongoId().withMessage('Valid student ID is required'),
   body('newClassId').isMongoId().withMessage('Valid new class ID is required'),
@@ -43,8 +51,8 @@ router.get('/:id', classController.getClassById);
 router.put('/:id', classUpdateValidation, validate, classController.updateClass);
 router.delete('/:id', classController.deleteClass);
 router.get('/:id/students', classController.getClassStudents);
-router.post('/:id/students', validate, classController.addStudents);
-router.delete('/:id/students', validate, classController.removeStudents);
+router.post('/:id/students', addStudentValidation, validate, classController.addStudent);
+router.delete('/:id/students', removeStudentValidation, validate, classController.removeStudent);
 
 // Student enrollment management routes
 router.post('/transfer', transferStudentValidation, validate, classController.transferStudent);

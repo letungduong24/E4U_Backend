@@ -62,25 +62,35 @@ const deleteClass = async (req, res, next) => {
   }
 };
 
-// @desc    Add students to class
+// @desc    Add student to class
 // @route   POST /api/classes/:id/students
 // @access  Admin
-const addStudents = async (req, res, next) => {
+const addStudent = async (req, res, next) => {
   try {
-    const cls = await classService.addStudents(req.params.id, req.body.studentIds || []);
-    res.status(200).json({ status: 'success', data: { class: cls } });
+    const { studentId } = req.body;
+    const cls = await classService.addStudent(req.params.id, studentId);
+    res.status(200).json({ 
+      status: 'success', 
+      message: 'Student added to class successfully',
+      data: { class: cls } 
+    });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Remove students from class
+// @desc    Remove student from class
 // @route   DELETE /api/classes/:id/students
 // @access  Admin
-const removeStudents = async (req, res, next) => {
+const removeStudent = async (req, res, next) => {
   try {
-    const cls = await classService.removeStudents(req.params.id, req.body.studentIds || []);
-    res.status(200).json({ status: 'success', data: { class: cls } });
+    const { studentId } = req.body;
+    const cls = await classService.removeStudent(req.params.id, studentId);
+    res.status(200).json({ 
+      status: 'success', 
+      message: 'Student removed from class successfully',
+      data: { class: cls } 
+    });
   } catch (error) {
     next(error);
   }
@@ -218,8 +228,8 @@ module.exports = {
   getClassById,
   updateClass,
   deleteClass,
-  addStudents,
-  removeStudents,
+  addStudent,
+  removeStudent,
   // Student enrollment management
   transferStudent,
   enrollStudent,
