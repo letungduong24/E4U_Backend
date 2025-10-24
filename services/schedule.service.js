@@ -48,6 +48,13 @@ const upcomingSchedulesForUser = async (classId) => {
   return schedules;
 }
 
+const getSchedulesByDate = async (day) => {
+  const schedules = await ScheduleModel.find({ day })
+    .populate('class', 'name code')
+    .sort({ period: 1 });
+  return schedules;
+}
+
 
   
 
@@ -56,5 +63,6 @@ module.exports = {
   listSchedulesByClassId,
   updateSchedule,
   deleteSchedule,
-  upcomingSchedulesForUser
+  upcomingSchedulesForUser,
+  getSchedulesByDate
 };

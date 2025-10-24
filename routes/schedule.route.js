@@ -7,9 +7,10 @@ const router = express.Router();
 
 router.use(protect); 
 router.get('/my-schedule', scheduleController.mySchedule);
-router.use('/upcoming', scheduleController.upcomingSchedulesForUser);
+router.get('/upcoming', scheduleController.upcomingSchedulesForUser);
 
 router.use(authorize('admin'));
+router.get('/by-date', scheduleController.getSchedulesByDate);
 router.post('/', validate, scheduleController.createSchedule);
 router.get('/:id', scheduleController.listSchedulesByClassId);
 router.put('/:id', validate, scheduleController.updateSchedule);

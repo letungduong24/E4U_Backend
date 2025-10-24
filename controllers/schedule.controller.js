@@ -99,11 +99,35 @@ const upcomingSchedulesForUser = async (req, res, next) => {
   }
 };
 
+// @desc    Get schedules by date
+// @route   GET /api/schedules/by-date?day=2025-12-31
+// @access  Admin
+const getSchedulesByDate = async (req, res, next) => {
+  try {
+    const { day } = req.query;
+    if (!day) {
+      return res.status(400).json({ 
+        status: 'error', 
+        message: 'Day parameter is required' 
+      });
+    }
+    
+    const schedules = await scheduleServices.getSchedulesByDate(day);
+    res.status(200).json({ 
+      status: 'success', 
+      data: { schedules } 
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createSchedule,
   listSchedulesByClassId,
   mySchedule,
   updateSchedule,
   deleteSchedule,
-  upcomingSchedulesForUser
+  upcomingSchedulesForUser,
+  getSchedulesByDate
 };
