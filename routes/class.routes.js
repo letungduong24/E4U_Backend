@@ -65,4 +65,7 @@ router.delete('/:id/teacher', classController.removeHomeroomTeacher);
 router.get('/teachers/unassigned', classController.getUnassignedTeachers);
 router.get('/without-teacher', classController.getClassesWithoutTeacher);
 
+// Student management routes
+router.get('/students/unassigned', classController.getUnassignedStudents);
+
 module.exports = router;

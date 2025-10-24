@@ -391,6 +391,49 @@ const getClassesWithoutTeacher = async () => {
   return classes;
 };
 
+// Get students without assigned classes
+const getUnassignedStudents = async () => {
+  const students = await User.find({
+    role: 'student',
+    $or: [
+      { currentClass: { $exists: false } },
+      { currentClass: null }
+    ]
+  })
+    .select('-password')
+    .populate({
+      path: 'currentClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'teachingClass',
+      select: 'name code description homeroomTeacher isActive',
+      populate: {
+        path: 'homeroomTeacher',
+        select: 'firstName lastName'
+      }
+    })
+    .populate({
+      path: 'enrollmentHistory',
+      select: 'status enrolledAt completedAt droppedAt notes',
+      populate: {
+        path: 'class',
+        select: 'name code description homeroomTeacher maxStudents isActive',
+        populate: {
+          path: 'homeroomTeacher',
+          select: 'firstName lastName email'
+        }
+      }
+    })
+    .sort({ createdAt: -1 });
+  
+  return students;
+};
+
 // Get students of a class
 const getClassStudents = async (classId) => {
   // Validate class exists
@@ -455,5 +498,6 @@ module.exports = {
   getUnassignedTeachers,
   getClassesWithoutTeacher,
   // Student management
-  getClassStudents
+  getClassStudents,
+  getUnassignedStudents
 };

@@ -207,6 +207,21 @@ const getClassesWithoutTeacher = async (req, res, next) => {
   }
 };
 
+// @desc    Get students without assigned classes
+// @route   GET /api/classes/students/unassigned
+// @access  Admin
+const getUnassignedStudents = async (req, res, next) => {
+  try {
+    const students = await classService.getUnassignedStudents();
+    res.status(200).json({
+      status: 'success',
+      data: { students }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get students of a class
 // @route   GET /api/classes/:id/students
 // @access  Admin
@@ -235,6 +250,7 @@ module.exports = {
   enrollStudent,
   getStudentHistory,
   getClassStudents,
+  getUnassignedStudents,
   // Homeroom teacher management
   setHomeroomTeacher,
   removeHomeroomTeacher,
