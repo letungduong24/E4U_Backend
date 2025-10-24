@@ -42,6 +42,7 @@ router.get('/', classController.listClasses);
 router.get('/:id', classController.getClassById);
 router.put('/:id', classUpdateValidation, validate, classController.updateClass);
 router.delete('/:id', classController.deleteClass);
+router.get('/:id/students', classController.getClassStudents);
 router.post('/:id/students', validate, classController.addStudents);
 router.delete('/:id/students', validate, classController.removeStudents);
 

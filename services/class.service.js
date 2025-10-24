@@ -395,6 +395,55 @@ const getClassesWithoutTeacher = async () => {
   return classes;
 };
 
+// Get students of a class
+const getClassStudents = async (classId) => {
+  // Validate class exists
+  const cls = await ClassModel.findById(classId);
+  if (!cls) throw new Error('Class not found');
+  
+  // Get all enrolled students for this class
+  const enrollments = await StudentClass.find({
+    class: classId,
+    status: 'enrolled'
+  })
+    .populate({
+      path: 'student',
+      select: 'firstName lastName email phoneNumber dateOfBirth address',
+      populate: {
+        path: 'currentClass',
+        select: 'name code'
+      }
+    })
+    .sort({ enrolledAt: -1 });
+  
+  return {
+    class: {
+      _id: cls._id,
+      name: cls.name,
+      code: cls.code,
+      description: cls.description,
+      maxStudents: cls.maxStudents,
+      isActive: cls.isActive
+    },
+    students: enrollments.map(enrollment => ({
+      _id: enrollment.student._id,
+      firstName: enrollment.student.firstName,
+      lastName: enrollment.student.lastName,
+      email: enrollment.student.email,
+      phoneNumber: enrollment.student.phoneNumber,
+      dateOfBirth: enrollment.student.dateOfBirth,
+      address: enrollment.student.address,
+      currentClass: enrollment.student.currentClass,
+      enrollmentInfo: {
+        _id: enrollment._id,
+        status: enrollment.status,
+        enrolledAt: enrollment.enrolledAt,
+        notes: enrollment.notes
+      }
+    }))
+  };
+};
+
 module.exports = {
   createClass,
   listClasses,
@@ -408,5 +457,7 @@ module.exports = {
   removeTeacherFromClass,
   removeTeacherFromClassByClassId,
   getUnassignedTeachers,
-  getClassesWithoutTeacher
+  getClassesWithoutTeacher,
+  // Student management
+  getClassStudents
 };

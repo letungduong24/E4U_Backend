@@ -197,6 +197,21 @@ const getClassesWithoutTeacher = async (req, res, next) => {
   }
 };
 
+// @desc    Get students of a class
+// @route   GET /api/classes/:id/students
+// @access  Admin
+const getClassStudents = async (req, res, next) => {
+  try {
+    const result = await classService.getClassStudents(req.params.id);
+    res.status(200).json({
+      status: 'success',
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createClass,
   listClasses,
@@ -209,6 +224,7 @@ module.exports = {
   transferStudent,
   enrollStudent,
   getStudentHistory,
+  getClassStudents,
   // Homeroom teacher management
   setHomeroomTeacher,
   removeHomeroomTeacher,
