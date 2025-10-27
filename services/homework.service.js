@@ -4,7 +4,7 @@ const Class = require("../models/class.model");
 
 // Create homework assignment
 const createHomework = async (payload) => {
-  const { description, classId, deadline, file, teacherId } = payload;
+  const { title, description, classId, deadline, file, teacherId } = payload;
   console.log(payload);
   const classDoc = await Class.findById(classId);
   if (!classDoc) throw new Error("Class not found");
