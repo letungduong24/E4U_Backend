@@ -113,8 +113,7 @@ const getUpcomingAssignments = async (req, res, next) => {
     const assignments = await homeworkService.listHomeworks({
       classId: req.user.currentClass,
       sortBy: 'deadline',
-      sortOrder: 'asc',
-      limit: 4
+      sortOrder: 'asc'
     });
     
     res.status(200).json({ 
@@ -136,8 +135,7 @@ const getOverdueAssignments = async (req, res, next) => {
       classId: req.user.currentClass,
       deadline: { $lt: now },
       sortBy: 'deadline',
-      sortOrder: 'desc',
-      limit: 10
+      sortOrder: 'desc'
     });
     
     res.status(200).json({ 

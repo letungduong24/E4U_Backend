@@ -47,10 +47,9 @@ const getHomeworkByClassId = async (classId) => {
 
 const listHomeworks = async (filters = {}) => {
   const {
-    page = 1,
-    limit = 10,
     classId,
     search,
+    deadline,
     sortBy = "deadline",
     sortOrder = "asc",
   } = filters;
@@ -58,27 +57,29 @@ const listHomeworks = async (filters = {}) => {
   const query = {};
 
   if (classId) query.classId = classId;
-  if (search) query.description = { $regex: search, $options: "i" };
+  
+  // Tìm kiếm theo cả title và description
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } }
+    ];
+  }
+
+  // Xử lý filter deadline (dùng cho overdue assignments)
+  if (deadline && typeof deadline === 'object') {
+    query.deadline = deadline;
+  }
 
   const sortOptions = {};
   sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1;
 
   const homeworks = await Homework.find(query)
     .populate("classId", "name code")
-    .sort(sortOptions)
-    .limit(limit * 1)
-    .skip((page - 1) * limit);
-
-  const total = await Homework.countDocuments(query);
+    .sort(sortOptions);
 
   return {
-    homeworks,
-    pagination: {
-      page: parseInt(page),
-      limit: parseInt(limit),
-      total,
-      pages: Math.ceil(total / limit),
-    },
+    homeworks
   };
 };
 
