@@ -1,0 +1,38 @@
+### Test Document Search Endpoints
+
+### 1. Search documents with keyword (Student/Teacher)
+GET http://localhost:5000/api/documents/search?q=math
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 2. Search in specific class
+GET http://localhost:5000/api/documents/search?q=assignment&classId=YOUR_CLASS_ID
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 3. List documents with search filter and pagination
+GET http://localhost:5000/api/documents?search=exam&page=1&limit=10&sortBy=createdAt&sortOrder=desc
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 4. List all documents (Student - only their class)
+GET http://localhost:5000/api/documents
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 5. List all documents (Teacher - only their documents)
+GET http://localhost:5000/api/documents
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
+### 6. Search with multiple keywords
+GET http://localhost:5000/api/documents/search?q=homework
+Authorization: Bearer YOUR_TOKEN_HERE
+
+###
+
