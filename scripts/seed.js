@@ -350,6 +350,7 @@ const seedDatabase = async () => {
     console.log('\n📅 Creating homeworks for classes...')
     const seedHomeworks = [
         {
+            title: "BT1",
             description: "Bài tập thì quá khứ đơn",
             classId: "68bbf5293fdcd59a9429ce2a",
             deadline: "2026-06-07",
@@ -360,6 +361,7 @@ const seedDatabase = async () => {
             teacherId: teachers[0]._id
         },
         {
+            title: "BT2",
             description: "Bài tập thì quá khứ đơn",
             classId: "68bbf5293fdcd59a9429ce2a",
             deadline: "2026-06-07",
