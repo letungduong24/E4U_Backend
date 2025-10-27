@@ -78,7 +78,7 @@ const listDocuments = async (filters = {}) => {
       search,
       page = 1,
       limit = 10,
-      sortBy = 'uploadDate',
+      sortBy = 'createdAt',
       sortOrder = 'desc'
     } = filters;
 
@@ -93,8 +93,13 @@ const listDocuments = async (filters = {}) => {
       query.teacherId = teacherId;
     }
 
+    // Search in title and description using regex
     if (search) {
-      query.$text = { $search: search };
+      const searchRegex = new RegExp(search, 'i'); // Case-insensitive
+      query.$or = [
+        { title: searchRegex },
+        { description: searchRegex }
+      ];
     }
 
     // Build sort object
@@ -185,9 +190,14 @@ const deleteDocument = async (documentId, teacherId) => {
 // @access  Teacher, Student
 const searchDocuments = async (searchTerm, classId = null) => {
   try {
+    const searchRegex = new RegExp(searchTerm, 'i'); // Case-insensitive
+    
     const query = {
       isActive: true,
-      $text: { $search: searchTerm }
+      $or: [
+        { title: searchRegex },
+        { description: searchRegex }
+      ]
     };
 
     if (classId) {
@@ -196,7 +206,7 @@ const searchDocuments = async (searchTerm, classId = null) => {
 
     const documents = await Document.find(query)
       .populate('classId', 'name code')
-      .sort({ score: { $meta: 'textScore' } })
+      .sort({ createdAt: -1 })
       .limit(20);
 
     return documents;
