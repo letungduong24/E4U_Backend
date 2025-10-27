@@ -14,6 +14,7 @@ const createHomework = async (payload) => {
   }
 
   const homework = await Homework.create({
+    title,
     description,
     classId,
     deadline: new Date(deadline),
