@@ -48,15 +48,33 @@ const updateProfileValidation = [
     .trim()
     .isLength({ min: 2, max: 50 })
     .withMessage('Last name must be between 2 and 50 characters'),
+  body('profile.avatar')
+    .optional()
+    .trim()
+    .isURL({ protocols: ['http', 'https'], require_protocol: true })
+    .withMessage('Avatar must be a valid URL'),
   body('profile.phone')
     .optional()
     .trim()
     .matches(/^[\+]?[1-9][\d]{0,15}$/)
     .withMessage('Please provide a valid phone number'),
+  body('profile.dateOfBirth')
+    .optional()
+    .isISO8601()
+    .withMessage('Date of birth must be a valid date'),
   body('profile.gender')
     .optional()
-    .isIn(['male', 'female', 'other', 'prefer-not-to-say'])
-    .withMessage('Invalid gender selection')
+    .isIn(['Nam', 'Nữ'])
+    .withMessage('Invalid gender selection'),
+  body('profile.address')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Address cannot be more than 100 characters'),
+  body('profile.notification')
+    .optional()
+    .isBoolean()
+    .withMessage('Notification must be a boolean value')
 ];
 
 const changePasswordValidation = [

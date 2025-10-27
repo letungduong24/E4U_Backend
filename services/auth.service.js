@@ -137,9 +137,27 @@ const updateProfile = async (userId, updateData) => {
   delete filteredData.email;
   delete filteredData.isActive;
 
+  // Handle profile updates separately to avoid overwriting the entire profile object
+  let profileUpdate = {};
+  if (updateData.profile) {
+    const { avatar, phone, dateOfBirth, gender, address, notification } = updateData.profile;
+    
+    if (avatar !== undefined) profileUpdate['profile.avatar'] = avatar;
+    if (phone !== undefined) profileUpdate['profile.phone'] = phone;
+    if (dateOfBirth !== undefined) profileUpdate['profile.dateOfBirth'] = dateOfBirth;
+    if (gender !== undefined) profileUpdate['profile.gender'] = gender;
+    if (address !== undefined) profileUpdate['profile.address'] = address;
+    if (notification !== undefined) profileUpdate['profile.notification'] = notification;
+    
+    delete filteredData.profile;
+  }
+
+  // Merge profile updates with other updates
+  const finalUpdateData = { ...filteredData, ...profileUpdate };
+
   const user = await User.findByIdAndUpdate(
     userId,
-    filteredData,
+    finalUpdateData,
     {
       new: true,
       runValidators: true
