@@ -109,6 +109,18 @@ const getClassById = async (req, res, next) => {
   }
 };
 
+// @desc    Get dashboard statistics (admin)
+// @route   GET /api/admin/dashboard/stats
+// @access  Admin
+const getDashboardStats = async (req, res, next) => {
+  try {
+    const stats = await adminService.getDashboardStats();
+    res.status(200).json({ status: 'success', data: { stats } });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 module.exports = {
   listUsers,
@@ -120,6 +132,8 @@ module.exports = {
   // Class management
   listClasses,
   getClassById,
+  // Dashboard
+  getDashboardStats,
 };
 
 

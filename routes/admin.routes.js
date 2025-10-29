@@ -29,6 +29,9 @@ router.patch('/users/:id/active', setUserActiveValidation, validate, adminContro
 router.get('/classes', adminController.listClasses);
 router.get('/classes/:id', adminController.getClassById);
 
+// Dashboard routes
+router.get('/dashboard/stats', adminController.getDashboardStats);
+
 module.exports = router;
 
 

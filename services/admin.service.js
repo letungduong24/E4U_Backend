@@ -1,5 +1,8 @@
 const User = require('../models/user.model');
 const Class = require('../models/class.model');
+const Homework = require('../models/homework.model');
+const Document = require('../models/document.model');
+const Schedule = require('../models/schedule.model');
 const authService = require('./auth.service');
 const studentClassService = require('./student_class.service');
 const mongoose = require('mongoose');
@@ -295,6 +298,25 @@ const setUserActiveStatus = async (userId, isActive) => {
   return user;
 };
 
+// Get dashboard statistics for admin
+const getDashboardStats = async () => {
+  const [homeworkCount, documentCount, scheduleCount, studentCount, classCount] = await Promise.all([
+    Homework.countDocuments(),
+    Document.countDocuments({ isActive: true }),
+    Schedule.countDocuments(),
+    User.countDocuments({ role: 'student' }),
+    Class.countDocuments()
+  ]);
+
+  return {
+    homeworkCount,
+    documentCount,
+    scheduleCount,
+    studentCount,
+    classCount
+  };
+};
+
 
 
 module.exports = {
@@ -304,6 +326,8 @@ module.exports = {
   getUserById,
   updateUserByAdmin,
   deleteUser,
-  setUserActiveStatus
+  setUserActiveStatus,
+  // dashboard
+  getDashboardStats
 };
 
