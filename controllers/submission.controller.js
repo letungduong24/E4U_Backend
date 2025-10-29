@@ -13,10 +13,7 @@ const createSubmission = async (req, res, next) => {
     const submission = await submissionService.createSubmission({
       homeworkId: req.body.homeworkId,
       studentId: user._id,
-      file: req.file ? {
-        fileName: req.file.originalname,
-        filePath: req.file.path
-      } : null
+      file: req.file ? req.file.path : req.body.file || null
     });
     
     res.status(201).json({
@@ -42,10 +39,7 @@ const updateSubmission = async (req, res, next) => {
       req.params.id,
       user._id, // Truyền studentId để kiểm tra ownership
       {
-        file: req.file ? {
-          fileName: req.file.originalname,
-          filePath: req.file.path
-        } : undefined
+        file: req.file ? req.file.path : req.body.file || undefined
       }
     );
     

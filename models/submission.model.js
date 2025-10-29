@@ -12,8 +12,8 @@ const submissionSchema = new mongoose.Schema({
     required: [true, 'Student ID is required']
   },
   file: {
-    fileName: String,
-    filePath: String
+    type: String,
+    trim: true
   },
   status: {
     type: String,
