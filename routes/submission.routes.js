@@ -90,6 +90,11 @@ router.get('/student',
   submissionController.getStudentSubmissions
 );
 
+router.get('/student/graded',
+  authorize('student'),
+  submissionController.getGradedSubmissionsForStudent
+);
+
 // Teacher routes
 router.post('/:id/grade',
   authorize('teacher'),

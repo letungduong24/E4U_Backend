@@ -105,6 +105,27 @@ const getStudentSubmissions = async (req, res, next) => {
   }
 };
 
+// @desc    Get graded submissions for student
+// @route   GET /api/submissions/student/graded
+// @access  Student only (own graded submissions)
+const getGradedSubmissionsForStudent = async (req, res, next) => {
+  try {
+    const user = req.user;
+    if (user.role !== 'student') {
+      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can view graded submissions' });
+    }
+    
+    const submissions = await submissionService.getGradedSubmissionsForStudent(user._id);
+    
+    res.status(200).json({
+      status: 'success',
+      data: { submissions }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get submission by ID
 // @route   GET /api/submissions/:id
 // @access  Student, Teacher
@@ -200,6 +221,7 @@ module.exports = {
   updateSubmission,
   gradeSubmission,
   getStudentSubmissions,
+  getGradedSubmissionsForStudent,
   getSubmissionById,
   getSubmissionByHomeworkIdForStudent,
   getSubmissionsByHomeworkIdForTeacher,

@@ -114,6 +114,18 @@ const getStudentSubmissions = async (studentId, { status }) => {
   return submissions;
 };
 
+// Xem các bài đã được chấm điểm
+const getGradedSubmissionsForStudent = async (studentId) => {
+  const submissions = await Submission.find({ 
+    studentId,
+    status: 'graded'
+  })
+    .populate("homeworkId", "title description deadline classId")
+    .sort({ gradedAt: -1 });
+  
+  return submissions;
+};
+
 // xem chi tiet bai da nop
 const getSubmissionById = async (submissionId, studentId = null) => {
   const submission = await Submission.findById(submissionId);
@@ -226,6 +238,7 @@ module.exports = {
   updateSubmission,
   gradeSubmission,
   getStudentSubmissions,
+  getGradedSubmissionsForStudent,
   getSubmissionById,
   getSubmissionByHomeworkIdForStudent,
   getSubmissionsByHomeworkIdForTeacher,
