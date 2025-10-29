@@ -9,11 +9,11 @@ const createDocument = async (documentData) => {
     // Verify teacher is assigned to the class
     const classData = await Class.findById(documentData.classId);
     if (!classData) {
-      throw new Error('Class not found');
+      throw new Error('Không tìm thấy lớp học');
     }
 
     if (classData.homeroomTeacher.toString() !== documentData.teacherId.toString()) {
-      throw new Error('You are not authorized to upload documents for this class');
+      throw new Error('Bạn không có quyền tải tài liệu cho lớp học này');
     }
 
     const document = await Document.create(documentData);
@@ -33,11 +33,11 @@ const getDocumentById = async (documentId) => {
       .populate('classId', 'name code');
 
     if (!document) {
-      throw new Error('Document not found');
+      throw new Error('Không tìm thấy tài liệu');
     }
 
     if (!document.isActive) {
-      throw new Error('Document has been deleted');
+      throw new Error('Tài liệu đã bị xóa');
     }
 
     return document;
@@ -141,11 +141,11 @@ const updateDocument = async (documentId, updateData, teacherId) => {
     const document = await Document.findById(documentId);
     
     if (!document) {
-      throw new Error('Document not found');
+      throw new Error('Không tìm thấy tài liệu');
     }
 
     if (document.teacherId.toString() !== teacherId.toString()) {
-      throw new Error('You are not authorized to update this document');
+      throw new Error('Bạn không có quyền cập nhật tài liệu này');
     }
 
     // Update lastModified will be handled by pre-save middleware
@@ -169,17 +169,17 @@ const deleteDocument = async (documentId, teacherId) => {
     const document = await Document.findById(documentId);
     
     if (!document) {
-      throw new Error('Document not found');
+      throw new Error('Không tìm thấy tài liệu');
     }
 
     if (document.teacherId.toString() !== teacherId.toString()) {
-      throw new Error('You are not authorized to delete this document');
+      throw new Error('Bạn không có quyền xóa tài liệu này');
     }
 
     // Soft delete by setting isActive to false
     await Document.findByIdAndUpdate(documentId, { isActive: false });
 
-    return { message: 'Document deleted successfully' };
+    return { message: 'Xóa tài liệu thành công' };
   } catch (error) {
     throw error;
   }

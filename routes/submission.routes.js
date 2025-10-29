@@ -11,7 +11,7 @@ const router = express.Router();
 const submissionCreateValidation = [
   body('homeworkId')
     .isMongoId()
-    .withMessage('Valid homeworkId is required'),
+    .withMessage('homeworkId hợp lệ là bắt buộc'),
   body('file')
     .optional()
     .custom((value) => {
@@ -19,14 +19,14 @@ const submissionCreateValidation = [
       if (typeof value === 'string' || typeof value === 'object' || value === undefined) {
         return true;
       }
-      throw new Error('File must be a valid file or object');
+      throw new Error('File phải là một tệp hoặc object hợp lệ');
     })
 ];
 
 const submissionUpdateValidation = [
   param('id')
     .isMongoId()
-    .withMessage('Valid submission ID is required'),
+    .withMessage('ID bài nộp hợp lệ là bắt buộc'),
   body('file')
     .optional()
     .custom((value) => {
@@ -34,22 +34,22 @@ const submissionUpdateValidation = [
       if (typeof value === 'string' || typeof value === 'object' || value === undefined) {
         return true;
       }
-      throw new Error('File must be a valid file or object');
+      throw new Error('File phải là một tệp hoặc object hợp lệ');
     })
 ];
 
 const gradeValidation = [
   param('id')
     .isMongoId()
-    .withMessage('Valid submission ID is required'),
+    .withMessage('ID bài nộp hợp lệ là bắt buộc'),
   body('grade')
     .isFloat({ min: 0, max: 100 })
-    .withMessage('Grade must be between 0 and 100'),
+    .withMessage('Điểm phải từ 0 đến 100'),
   body('feedback')
     .optional()
     .isString()
     .isLength({ max: 2000 })
-    .withMessage('Feedback cannot exceed 2000 characters')
+    .withMessage('Phản hồi không được vượt quá 2000 ký tự')
 ];
 
 // Public routes (no authentication required)
@@ -106,7 +106,7 @@ router.post('/:id/grade',
 router.get('/homework/:homeworkId/student',
   authorize('student'),
   [
-    param('homeworkId').isMongoId().withMessage('Valid homework ID is required')
+    param('homeworkId').isMongoId().withMessage('ID bài tập hợp lệ là bắt buộc')
   ],
   validate,
   submissionController.getSubmissionByHomeworkIdForStudent
@@ -115,7 +115,7 @@ router.get('/homework/:homeworkId/student',
 router.get('/homework/:homeworkId/teacher',
   authorize('teacher'),
   [
-    param('homeworkId').isMongoId().withMessage('Valid homework ID is required')
+    param('homeworkId').isMongoId().withMessage('ID bài tập hợp lệ là bắt buộc')
   ],
   validate,
   submissionController.getSubmissionsByHomeworkIdForTeacher

@@ -71,7 +71,7 @@ const addStudent = async (req, res, next) => {
     const cls = await classService.addStudent(req.params.id, studentId);
     res.status(200).json({ 
       status: 'success', 
-      message: 'Student added to class successfully',
+      message: 'Thêm học sinh vào lớp thành công',
       data: { class: cls } 
     });
   } catch (error) {
@@ -88,7 +88,7 @@ const removeStudent = async (req, res, next) => {
     const cls = await classService.removeStudent(req.params.id, studentId);
     res.status(200).json({ 
       status: 'success', 
-      message: 'Student removed from class successfully',
+      message: 'Xóa học sinh khỏi lớp thành công',
       data: { class: cls } 
     });
   } catch (error) {
@@ -105,7 +105,7 @@ const transferStudent = async (req, res, next) => {
     const result = await studentClassService.transferStudent(studentId, newClassId, notes);
     res.status(200).json({
       status: 'success',
-      message: 'Student transferred successfully',
+      message: 'Chuyển lớp học sinh thành công',
       data: result
     });
   } catch (error) {
@@ -121,7 +121,7 @@ const enrollStudent = async (req, res, next) => {
     const enrollment = await studentClassService.enrollStudent(req.body);
     res.status(201).json({
       status: 'success',
-      message: 'Student enrolled successfully',
+      message: 'Ghi danh học sinh thành công',
       data: { enrollment }
     });
   } catch (error) {
@@ -153,7 +153,7 @@ const setHomeroomTeacher = async (req, res, next) => {
     const classData = await classService.setTeacherClass(teacherId, req.params.id);
     res.status(200).json({
       status: 'success',
-      message: 'Homeroom teacher assigned successfully',
+      message: 'Phân công giáo viên chủ nhiệm thành công',
       data: { class: classData }
     });
   } catch (error) {
@@ -169,7 +169,7 @@ const removeHomeroomTeacher = async (req, res, next) => {
     const classData = await classService.removeTeacherFromClassByClassId(req.params.id);
     res.status(200).json({
       status: 'success',
-      message: 'Homeroom teacher removed successfully',
+      message: 'Gỡ giáo viên chủ nhiệm thành công',
       data: { class: classData }
     });
   } catch (error) {

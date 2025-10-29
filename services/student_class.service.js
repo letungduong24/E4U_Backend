@@ -8,18 +8,18 @@ const enrollStudent = async (enrollmentData) => {
   
   // Check if student exists
   const studentDoc = await User.findById(student);
-  if (!studentDoc) throw new Error('Student not found');
-  if (studentDoc.role !== 'student') throw new Error('User is not a student');
+  if (!studentDoc) throw new Error('Không tìm thấy học sinh');
+  if (studentDoc.role !== 'student') throw new Error('Người dùng không phải là học sinh');
   
   // Check if class exists
   const classDoc = await Class.findById(classId);
-  if (!classDoc) throw new Error('Class not found');
+  if (!classDoc) throw new Error('Không tìm thấy lớp học');
   
   // Check if student is already enrolled in this class
   const existingEnrollment = await StudentClass.findOne({ student, class: classId });
   if (existingEnrollment) {
     if (existingEnrollment.status === 'enrolled') {
-      throw new Error('Student is already enrolled in this class');
+      throw new Error('Học sinh đã được ghi danh vào lớp này');
     }
     if (existingEnrollment.status === 'dropped') {
       // Re-enroll the student
@@ -38,7 +38,7 @@ const enrollStudent = async (enrollmentData) => {
     status: 'enrolled' 
   });
   if (currentEnrollment) {
-    throw new Error('Student can only be enrolled in one class at a time. Please complete or drop current class first.');
+    throw new Error('Học sinh chỉ có thể ghi danh vào một lớp tại một thời điểm. Vui lòng hoàn thành hoặc rời lớp hiện tại trước.');
   }
   
   // Check class capacity
@@ -47,7 +47,7 @@ const enrollStudent = async (enrollmentData) => {
     status: 'enrolled' 
   });
   if (currentEnrollments >= classDoc.maxStudents) {
-    throw new Error('Class is at maximum capacity');
+    throw new Error('Lớp học đã đạt sĩ số tối đa');
   }
   
   // Create new enrollment
@@ -118,7 +118,7 @@ const getEnrollmentById = async (enrollmentId) => {
       }
     });
 
-  if (!enrollment) throw new Error('Enrollment not found');
+  if (!enrollment) throw new Error('Không tìm thấy đăng ký');
   return enrollment;
 };
 
@@ -161,7 +161,7 @@ const updateEnrollment = async (enrollmentId, updateData) => {
       }
     });
 
-  if (!enrollment) throw new Error('Enrollment not found');
+  if (!enrollment) throw new Error('Không tìm thấy đăng ký');
   
   // If student is no longer enrolled, remove from current class
   if (enrollment.status !== 'enrolled') {
@@ -181,12 +181,12 @@ const updateEnrollment = async (enrollmentId, updateData) => {
 const transferStudent = async (studentId, newClassId, notes = '') => {
   // Check if student exists
   const studentDoc = await User.findById(studentId);
-  if (!studentDoc) throw new Error('Student not found');
-  if (studentDoc.role !== 'student') throw new Error('User is not a student');
+  if (!studentDoc) throw new Error('Không tìm thấy học sinh');
+  if (studentDoc.role !== 'student') throw new Error('Người dùng không phải là học sinh');
   
   // Check if new class exists
   const newClassDoc = await Class.findById(newClassId);
-  if (!newClassDoc) throw new Error('New class not found');
+  if (!newClassDoc) throw new Error('Không tìm thấy lớp học mới');
   
   // Get current enrollment
   const currentEnrollment = await StudentClass.findOne({ 
@@ -195,7 +195,7 @@ const transferStudent = async (studentId, newClassId, notes = '') => {
   });
   
   if (!currentEnrollment) {
-    throw new Error('Student is not currently enrolled in any class');
+    throw new Error('Học sinh hiện chưa được ghi danh vào lớp nào');
   }
   
   // Check if student is already enrolled in the new class
@@ -214,7 +214,7 @@ const transferStudent = async (studentId, newClassId, notes = '') => {
     status: 'enrolled' 
   });
   if (currentEnrollments >= newClassDoc.maxStudents) {
-    throw new Error('New class is at maximum capacity');
+    throw new Error('Lớp học mới đã đạt sĩ số tối đa');
   }
   
   // Complete current enrollment

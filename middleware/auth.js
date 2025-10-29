@@ -8,7 +8,7 @@ const protect = async (req, res, next) => {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         status: 'error',
-        message: 'Authorization token missing or invalid format',
+        message: 'Token xác thực bị thiếu hoặc định dạng không hợp lệ',
       });
     }
 
@@ -20,7 +20,7 @@ const protect = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({
         status: 'error',
-        message: 'User not found',
+        message: 'Không tìm thấy người dùng',
       });
     }
 
@@ -30,7 +30,7 @@ const protect = async (req, res, next) => {
     console.error('Auth error:', err);
     return res.status(401).json({
       status: 'error',
-      message: 'Not authorized to access this route',
+      message: 'Không có quyền truy cập route này',
     });
   }
 };
@@ -40,14 +40,14 @@ const authorize = (...roles) => {
     if (!req.user) {
       return res.status(401).json({
         status: 'error',
-        message: 'Not authorized to access this route',
+        message: 'Không có quyền truy cập route này',
       });
     }
 
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         status: 'error',
-        message: `User role ${req.user.role} is not authorized to access this route`,
+        message: `Vai trò ${req.user.role} không có quyền truy cập route này`,
       });
     }
 

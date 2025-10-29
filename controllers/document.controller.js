@@ -62,7 +62,7 @@ const createDocument = async (req, res, next) => {
     if (user.role !== 'teacher') {
       return res.status(403).json({ 
         status: 'fail', 
-        message: 'Access denied. Only teachers can upload documents.' 
+        message: 'Truy cập bị từ chối. Chỉ giáo viên mới có thể tải tài liệu lên.' 
       });
     }
 
@@ -86,7 +86,7 @@ const createDocument = async (req, res, next) => {
 
     res.status(201).json({
       status: 'success',
-      message: 'Document created successfully',
+      message: 'Tạo tài liệu thành công',
       data: { document }
     });
   } catch (error) {
@@ -114,13 +114,13 @@ const getDocumentById = async (req, res, next) => {
       if (user._id.toString() !== document.teacherId._id.toString()) {
         return res.status(403).json({
           status: 'fail',
-          message: 'Access denied. You can only view your own documents.'
+          message: 'Truy cập bị từ chối. Bạn chỉ có thể xem tài liệu của chính mình.'
         });
       }
     } else {
       return res.status(403).json({
         status: 'fail',
-        message: 'Access denied. Only teachers and students can view documents.'
+        message: 'Truy cập bị từ chối. Chỉ giáo viên và học sinh mới có thể xem tài liệu.'
       });
     }
 
@@ -155,7 +155,7 @@ const getDocumentsByClassId = async (req, res, next) => {
     } else {
       return res.status(403).json({
         status: 'fail',
-        message: 'Access denied. Only teachers and students can view documents.'
+        message: 'Truy cập bị từ chối. Chỉ giáo viên và học sinh mới có thể xem tài liệu.'
       });
     }
 
@@ -186,7 +186,7 @@ const listDocuments = async (req, res, next) => {
     } else {
       return res.status(403).json({
         status: 'fail',
-        message: 'Access denied. Only teachers and students can view documents.'
+        message: 'Truy cập bị từ chối. Chỉ giáo viên và học sinh mới có thể xem tài liệu.'
       });
     }
 
@@ -213,7 +213,7 @@ const updateDocument = async (req, res, next) => {
     if (user.role !== 'teacher') {
       return res.status(403).json({
         status: 'fail',
-        message: 'Access denied. Only teachers can update documents.'
+        message: 'Truy cập bị từ chối. Chỉ giáo viên mới có thể cập nhật tài liệu.'
       });
     }
 
@@ -238,7 +238,7 @@ const updateDocument = async (req, res, next) => {
 
     res.status(200).json({
       status: 'success',
-      message: 'Document updated successfully',
+      message: 'Cập nhật tài liệu thành công',
       data: { document }
     });
   } catch (error) {
@@ -256,7 +256,7 @@ const deleteDocument = async (req, res, next) => {
     if (user.role !== 'teacher') {
       return res.status(403).json({
         status: 'fail',
-        message: 'Access denied. Only teachers can delete documents.'
+        message: 'Truy cập bị từ chối. Chỉ giáo viên mới có thể xóa tài liệu.'
       });
     }
 
@@ -291,7 +291,7 @@ const searchDocuments = async (req, res, next) => {
     if (!searchTerm) {
       return res.status(400).json({
         status: 'fail',
-        message: 'Search term is required'
+        message: 'Thuật ngữ tìm kiếm là bắt buộc'
       });
     }
 
@@ -306,7 +306,7 @@ const searchDocuments = async (req, res, next) => {
     } else {
       return res.status(403).json({
         status: 'fail',
-        message: 'Access denied. Only teachers and students can search documents.'
+        message: 'Truy cập bị từ chối. Chỉ giáo viên và học sinh mới có thể tìm kiếm tài liệu.'
       });
     }
 
@@ -334,14 +334,14 @@ const downloadDocument = async (req, res, next) => {
       if (user.currentClass.toString() !== document.classId._id.toString()) {
         return res.status(403).json({
           status: 'fail',
-          message: 'Access denied. You can only download documents from your class.'
+          message: 'Truy cập bị từ chối. Bạn chỉ có thể tải xuống tài liệu từ lớp của mình.'
         });
       }
     } else if (user.role === 'teacher') {
       if (user._id.toString() !== document.teacherId.toString()) {
         return res.status(403).json({
           status: 'fail',
-          message: 'Access denied. You can only download your own documents.'
+          message: 'Truy cập bị từ chối. Bạn chỉ có thể tải xuống tài liệu của chính mình.'
         });
       }
     } else {
@@ -354,7 +354,7 @@ const downloadDocument = async (req, res, next) => {
     // Return file information (giống homework - không download file thật)
     res.status(200).json({
       status: 'success',
-      message: 'Document file information retrieved successfully',
+      message: 'Lấy thông tin tệp tài liệu thành công',
       data: {
         document: {
           _id: document._id,

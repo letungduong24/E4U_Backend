@@ -31,7 +31,7 @@ const listClasses = async ({ teacher, q }) => {
 const getClassById = async (classId) => {
   const cls = await ClassModel.findById(classId)
     .populate('homeroomTeacher', 'firstName lastName email role');
-  if (!cls) throw new Error('Class not found');
+  if (!cls) throw new Error('Không tìm thấy lớp học');
   return cls;
 };
 
@@ -40,8 +40,8 @@ const updateClass = async (classId, updateData) => {
   // Validate teacher if being updated
   if (updateData.homeroomTeacher) {
     const teacher = await User.findById(updateData.homeroomTeacher);
-    if (!teacher) throw new Error('Homeroom teacher not found');
-    if (teacher.role !== 'teacher') throw new Error('User is not a teacher');
+    if (!teacher) throw new Error('Không tìm thấy giáo viên chủ nhiệm');
+    if (teacher.role !== 'teacher') throw new Error('Người dùng không phải là giáo viên');
   }
   
   const allowed = ['name', 'code', 'description', 'homeroomTeacher', 'maxStudents', 'isActive'];
@@ -52,26 +52,26 @@ const updateClass = async (classId, updateData) => {
   const cls = await ClassModel.findByIdAndUpdate(classId, payload, { new: true, runValidators: true })
     .populate('homeroomTeacher', 'firstName lastName email role')
     .populate('students', 'firstName lastName email role');
-  if (!cls) throw new Error('Class not found');
+  if (!cls) throw new Error('Không tìm thấy lớp học');
   return cls;
 };
 
 const deleteClass = async (classId) => {
   const cls = await ClassModel.findByIdAndDelete(classId);
-  if (!cls) throw new Error('Class not found');
-  return { message: 'Class deleted' };
+  if (!cls) throw new Error('Không tìm thấy lớp học');
+  return { message: 'Xóa lớp học thành công' };
 };
 
 const addStudent = async (classId, studentId) => {
   // Validate class exists
   const cls = await ClassModel.findById(classId);
-  if (!cls) throw new Error('Class not found');
+  if (!cls) throw new Error('Không tìm thấy lớp học');
   
   // Validate user is a student
   const user = await User.findById(studentId);
-  if (!user) throw new Error('Student not found');
+  if (!user) throw new Error('Không tìm thấy học sinh');
   if (user.role !== 'student') {
-    throw new Error('User is not a student');
+    throw new Error('Người dùng không phải là học sinh');
   }
   
   // Check class capacity
@@ -80,7 +80,7 @@ const addStudent = async (classId, studentId) => {
     status: 'enrolled' 
   });
   if (currentEnrollments >= cls.maxStudents) {
-    throw new Error('Class is at maximum capacity');
+    throw new Error('Lớp học đã đạt sĩ số tối đa');
   }
   
   // Check if student already enrolled
@@ -91,7 +91,7 @@ const addStudent = async (classId, studentId) => {
   
   if (existingEnrollment) {
     if (existingEnrollment.status === 'enrolled') {
-      throw new Error('Student is already enrolled in this class');
+      throw new Error('Học sinh đã được ghi danh vào lớp này');
     }
     // Re-enroll if dropped
     existingEnrollment.status = 'enrolled';
@@ -105,7 +105,7 @@ const addStudent = async (classId, studentId) => {
       status: 'enrolled' 
     });
     if (currentEnrollment) {
-      throw new Error('Student is already enrolled in another class');
+      throw new Error('Học sinh đã được ghi danh vào lớp khác');
     }
     
     // Create new enrollment
@@ -145,7 +145,7 @@ const addStudent = async (classId, studentId) => {
 const removeStudent = async (classId, studentId) => {
   // Validate class exists
   const cls = await ClassModel.findById(classId);
-  if (!cls) throw new Error('Class not found');
+  if (!cls) throw new Error('Không tìm thấy lớp học');
   
   // Find enrollment record
   const enrollment = await StudentClass.findOne({ 
@@ -155,7 +155,7 @@ const removeStudent = async (classId, studentId) => {
   });
   
   if (!enrollment) {
-    throw new Error('Student is not enrolled in this class');
+    throw new Error('Học sinh chưa được ghi danh vào lớp này');
   }
   
   // Update enrollment to dropped status
@@ -183,22 +183,22 @@ const removeStudent = async (classId, studentId) => {
 const setTeacherClass = async (teacherId, classId) => {
   // Validate teacher exists and is a teacher
   const teacher = await User.findById(teacherId);
-  if (!teacher) throw new Error('Teacher not found');
-  if (teacher.role !== 'teacher') throw new Error('User is not a teacher');
+  if (!teacher) throw new Error('Không tìm thấy giáo viên');
+    if (teacher.role !== 'teacher') throw new Error('Người dùng không phải là giáo viên');
   
   // Check if teacher already has a teaching class
   if (teacher.teachingClass) {
-    throw new Error('Teacher is already assigned to a class. Please remove from current class first.');
+    throw new Error('Giáo viên đã được phân công vào một lớp. Vui lòng gỡ khỏi lớp hiện tại trước.');
   }
   
   // Validate class exists
   const classDoc = await ClassModel.findById(classId);
-  if (!classDoc) throw new Error('Class not found');
-  if (!classDoc.isActive) throw new Error('Class is not active');
+  if (!classDoc) throw new Error('Không tìm thấy lớp học');
+  if (!classDoc.isActive) throw new Error('Lớp học không hoạt động');
   
   // Check if class already has a homeroom teacher
   if (classDoc.homeroomTeacher && classDoc.homeroomTeacher.toString() !== teacherId) {
-    throw new Error('Class already has a homeroom teacher');
+    throw new Error('Lớp học đã có giáo viên chủ nhiệm');
   }
   
   // Update teacher's teaching class
@@ -253,11 +253,11 @@ const setTeacherClass = async (teacherId, classId) => {
 const removeTeacherFromClass = async (teacherId) => {
   // Validate teacher exists
   const teacher = await User.findById(teacherId);
-  if (!teacher) throw new Error('Teacher not found');
-  if (teacher.role !== 'teacher') throw new Error('User is not a teacher');
+  if (!teacher) throw new Error('Không tìm thấy giáo viên');
+    if (teacher.role !== 'teacher') throw new Error('Người dùng không phải là giáo viên');
   
   if (!teacher.teachingClass) {
-    throw new Error('Teacher is not assigned to any class');
+    throw new Error('Giáo viên chưa được phân công vào lớp nào');
   }
   
   // Remove teacher from class
@@ -311,7 +311,7 @@ const removeTeacherFromClassByClassId = async (classId) => {
   if (!classDoc) throw new Error('Class not found');
   
   if (!classDoc.homeroomTeacher) {
-    throw new Error('Class does not have a homeroom teacher');
+    throw new Error('Lớp học không có giáo viên chủ nhiệm');
   }
   
   const teacherId = classDoc.homeroomTeacher;
@@ -438,7 +438,7 @@ const getUnassignedStudents = async () => {
 const getClassStudents = async (classId) => {
   // Validate class exists
   const cls = await ClassModel.findById(classId);
-  if (!cls) throw new Error('Class not found');
+  if (!cls) throw new Error('Không tìm thấy lớp học');
   
   // Get all enrolled students for this class
   const enrollments = await StudentClass.find({

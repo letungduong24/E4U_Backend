@@ -25,7 +25,7 @@ const listUsers = async ({ role, classId, q }) => {
   if (classId) {
     // Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(classId)) {
-      throw new Error('Invalid classId format');
+      throw new Error('Định dạng classId không hợp lệ');
     }
     
     // Convert string to ObjectId
@@ -180,7 +180,7 @@ const getUserById = async (userId) => {
         }
       }
     });
-  if (!user) throw new Error('User not found');
+  if (!user) throw new Error('Không tìm thấy người dùng');
   return user;
 };
 
@@ -240,23 +240,23 @@ const updateUserByAdmin = async (userId, updateData) => {
       }
     });
 
-  if (!user) throw new Error('User not found');
+  if (!user) throw new Error('Không tìm thấy người dùng');
   return user;
 };
 
 const deleteUser = async (userId) => {
   // Check if user exists first
   const user = await User.findById(userId);
-  if (!user) throw new Error('User not found');
+  if (!user) throw new Error('Không tìm thấy người dùng');
   
   // Prevent deletion of admin users
   if (user.role === 'admin') {
-    throw new Error('Cannot delete admin users');
+    throw new Error('Không thể xóa người dùng admin');
   }
   
   // Delete the user
   await User.findByIdAndDelete(userId);
-  return { message: 'User deleted' };
+  return { message: 'Người dùng đã được xóa' };
 };
 
 const setUserActiveStatus = async (userId, isActive) => {
@@ -294,7 +294,7 @@ const setUserActiveStatus = async (userId, isActive) => {
         }
       }
     });
-  if (!user) throw new Error('User not found');
+  if (!user) throw new Error('Không tìm thấy người dùng');
   return user;
 };
 

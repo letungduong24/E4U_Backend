@@ -7,7 +7,7 @@ const createSubmission = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can create submissions' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối - Chỉ học sinh mới có thể nộp bài' });
     }
     
     const submission = await submissionService.createSubmission({
@@ -32,7 +32,7 @@ const updateSubmission = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can update submissions' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối - Chỉ học sinh mới có thể cập nhật bài nộp' });
     }
     
     const submission = await submissionService.updateSubmission(
@@ -59,7 +59,7 @@ const gradeSubmission = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'teacher') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối' });
     }
     
     const submission = await submissionService.gradeSubmission(
@@ -88,7 +88,7 @@ const getStudentSubmissions = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can view their submissions' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối - Chỉ học sinh mới có thể xem bài nộp của mình' });
     }
     
     const { status } = req.query;
@@ -112,7 +112,7 @@ const getGradedSubmissionsForStudent = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can view graded submissions' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối - Chỉ học sinh mới có thể xem bài đã chấm điểm' });
     }
     
     const submissions = await submissionService.getGradedSubmissionsForStudent(user._id);
@@ -135,7 +135,7 @@ const getSubmissionById = async (req, res, next) => {
     
     // Kiểm tra role - chỉ student và teacher được phép
     if (user.role !== 'student' && user.role !== 'teacher') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students and teachers can view submissions' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối - Chỉ học sinh và giáo viên mới có thể xem bài nộp' });
     }
     
     // Truyền studentId nếu user là student để kiểm tra ownership trong service
@@ -158,7 +158,7 @@ const getSubmissionByHomeworkIdForStudent = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can view homework submissions' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối - Chỉ học sinh mới có thể xem bài nộp bài tập' });
     }
     
     const { homeworkId } = req.params;
@@ -180,7 +180,7 @@ const getSubmissionsByHomeworkIdForTeacher = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'teacher') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied - Only teachers can view all submissions' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối - Chỉ giáo viên mới có thể xem tất cả bài nộp' });
     }
     
     const { homeworkId } = req.params;
@@ -202,7 +202,7 @@ const deleteSubmission = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'student') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can delete submissions' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối - Chỉ học sinh mới có thể xóa bài nộp' });
     }
     
     const result = await submissionService.deleteSubmission(req.params.id, user._id);

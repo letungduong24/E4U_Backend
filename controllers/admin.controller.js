@@ -26,7 +26,7 @@ const createUser = async (req, res, next) => {
     const user = await adminService.createUser(req.body);
     res.status(201).json({
       status: 'success',
-      message: 'User created successfully',
+      message: 'Tạo người dùng thành công',
       data: { user }
     });
   } catch (error) {

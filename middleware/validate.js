@@ -12,7 +12,7 @@ const validate = (req, res, next) => {
 
     return res.status(400).json({
       status: 'error',
-      message: 'Validation failed',
+      message: 'Xác thực thất bại',
       errors: errorMessages
     });
   }

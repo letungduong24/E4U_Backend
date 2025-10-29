@@ -43,7 +43,7 @@ const mySchedule = async (req, res, next) => {
         return res.status(200).json({ status: 'success', data: { schedules } });
     }
     else {
-        return res.status(403).json({ status: 'fail', message: 'Access denied' });
+        return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối' });
     }
   } catch (error) {
     next(error);
@@ -71,7 +71,7 @@ const deleteSchedule = async (req, res, next) => {
   try {
     const scheduleId = req.params.id;
     await scheduleServices.deleteSchedule(scheduleId);
-    res.status(200).json({ status: 'success', message: 'Schedule deleted successfully' });
+    res.status(200).json({ status: 'success', message: 'Xóa lịch học thành công' });
   } catch (error) {
     next(error);
   }
@@ -92,7 +92,7 @@ const upcomingSchedulesForUser = async (req, res, next) => {
         return res.status(200).json({ status: 'success', data: { schedules } });
     }
     else {
-        return res.status(403).json({ status: 'fail', message: 'Access denied' });
+        return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối' });
     }
   } catch (error) {
     next(error);
@@ -108,7 +108,7 @@ const getSchedulesByDate = async (req, res, next) => {
     if (!day) {
       return res.status(400).json({ 
         status: 'error', 
-        message: 'Day parameter is required' 
+        message: 'Tham số ngày là bắt buộc' 
       });
     }
     

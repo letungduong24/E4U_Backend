@@ -11,13 +11,13 @@ const homeworkCreateValidation = [
   body('description')
     .trim()
     .isLength({ min: 10, max: 2000 })
-    .withMessage('Description must be between 10 and 2000 characters'),
+    .withMessage('Mô tả phải có từ 10 đến 2000 ký tự'),
   body('deadline')
     .isISO8601()
-    .withMessage('Valid deadline is required')
+    .withMessage('Hạn nộp bài hợp lệ là bắt buộc')
     .custom((value) => {
       if (new Date(value) <= new Date()) {
-        throw new Error('Deadline must be in the future');
+        throw new Error('Hạn nộp bài phải ở tương lai');
       }
       return true;
     }),
@@ -28,28 +28,28 @@ const homeworkUpdateValidation = [
     .optional()
     .trim()
     .isLength({ min: 2, max: 20 })
-    .withMessage('Assignment ID must be between 2 and 20 characters')
+    .withMessage('ID bài tập phải có từ 2 đến 20 ký tự')
     .matches(/^[A-Z0-9_]+$/)
-    .withMessage('Assignment ID must contain only uppercase letters, numbers, and underscores'),
+    .withMessage('ID bài tập chỉ được chứa chữ hoa, số và dấu gạch dưới'),
   body('Description')
     .optional()
     .trim()
     .isLength({ min: 10, max: 2000 })
-    .withMessage('Description must be between 10 and 2000 characters'),
+    .withMessage('Mô tả phải có từ 10 đến 2000 ký tự'),
   body('Deadline')
     .optional()
     .isISO8601()
-    .withMessage('Valid deadline is required')
+    .withMessage('Hạn nộp bài hợp lệ là bắt buộc')
     .custom((value) => {
       if (new Date(value) <= new Date()) {
-        throw new Error('Deadline must be in the future');
+        throw new Error('Hạn nộp bài phải ở tương lai');
       }
       return true;
     }),
   body('Files')
     .optional()
     .isArray()
-    .withMessage('Files must be an array')
+    .withMessage('Files phải là một mảng')
 ];
 
 

@@ -107,7 +107,7 @@ const forgotPassword = async (req, res, next) => {
     // For now, we'll just return it in the response
     res.status(200).json({
       status: 'success',
-      message: 'Password reset token sent to email',
+      message: 'Mã token đặt lại mật khẩu đã được gửi đến email',
       data: {
         resetToken // Remove this in production
       }

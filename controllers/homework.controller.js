@@ -7,7 +7,7 @@ const createHomework = async (req, res, next) => {
   try {
     const user = req.user;
     if (user.role !== 'teacher') {
-      return res.status(403).json({ status: 'fail', message: 'Access denied' });
+      return res.status(403).json({ status: 'fail', message: 'Truy cập bị từ chối' });
     } 
     const homework = await homeworkService.createHomework({...req.body, teacherId: user._id, classId: user.teachingClass });
     res.status(201).json({ 

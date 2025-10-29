@@ -11,16 +11,16 @@ const createDocumentValidation = [
   body('title')
     .trim()
     .isLength({ min: 1, max: 200 })
-    .withMessage('Title must be between 1 and 200 characters'),
+    .withMessage('Tiêu đề phải có từ 1 đến 200 ký tự'),
   body('description')
     .trim()
     .isLength({ min: 1, max: 2000 })
-    .withMessage('Description must be between 1 and 2000 characters'),
+    .withMessage('Mô tả phải có từ 1 đến 2000 ký tự'),
   body('file')
     .optional()
     .trim()
     .isLength({ min: 1 })
-    .withMessage('File path cannot be empty')
+    .withMessage('Đường dẫn tệp không được để trống')
 ];
 
 const updateDocumentValidation = [
@@ -28,17 +28,17 @@ const updateDocumentValidation = [
     .optional()
     .trim()
     .isLength({ min: 1, max: 200 })
-    .withMessage('Title must be between 1 and 200 characters'),
+    .withMessage('Tiêu đề phải có từ 1 đến 200 ký tự'),
   body('description')
     .optional()
     .trim()
     .isLength({ min: 1, max: 2000 })
-    .withMessage('Description must be between 1 and 2000 characters'),
+    .withMessage('Mô tả phải có từ 1 đến 2000 ký tự'),
   body('file')
     .optional()
     .trim()
     .isLength({ min: 1 })
-    .withMessage('File path cannot be empty')
+    .withMessage('Đường dẫn tệp không được để trống')
 ];
 
 const searchValidation = [
@@ -46,7 +46,7 @@ const searchValidation = [
     .optional()
     .trim()
     .isLength({ min: 1 })
-    .withMessage('Search term cannot be empty')
+    .withMessage('Thuật ngữ tìm kiếm không được để trống')
 ];
 
 // All routes are protected

@@ -13,7 +13,7 @@ const register = async (userData) => {
 
   const existingUser = await User.findByEmail(email);
   if (existingUser) {
-    throw new Error('User already exists with this email');
+    throw new Error('Người dùng đã tồn tại với email này');
   }
 
   const user = await User.create({
@@ -29,17 +29,17 @@ const register = async (userData) => {
 
 const login = async (email, password) => {
   if (!email || !password) {
-    throw new Error('Please provide email and password');
+    throw new Error('Vui lòng cung cấp email và mật khẩu');
   }
 
   const user = await User.findByEmail(email).select('+password');
    
   if (!user) {
-    throw new Error('Invalid credentials');
+    throw new Error('Thông tin đăng nhập không hợp lệ');
   }
 
   if (!(await user.matchPassword(password))) {
-    throw new Error('Invalid credentials');
+    throw new Error('Thông tin đăng nhập không hợp lệ');
   }
    
   user.lastLogin = new Date();
@@ -88,7 +88,7 @@ const logout = (res) => {
 
   return {
     status: 'success',
-    message: 'User logged out successfully'
+    message: 'Đăng xuất thành công'
   };
 };
 
@@ -124,7 +124,7 @@ const getMe = async (userId) => {
     });
   
   if (!user) {
-    throw new Error('User not found');
+    throw new Error('Không tìm thấy người dùng');
   }
 
   return user;
@@ -165,7 +165,7 @@ const updateProfile = async (userId, updateData) => {
   );
 
   if (!user) {
-    throw new Error('User not found');
+    throw new Error('Không tìm thấy người dùng');
   }
 
   return user;
@@ -175,11 +175,11 @@ const changePassword = async (userId, currentPassword, newPassword) => {
   const user = await User.findById(userId).select('+password');
 
   if (!user) {
-    throw new Error('User not found');
+    throw new Error('Không tìm thấy người dùng');
   }
 
   if (!(await user.matchPassword(currentPassword))) {
-    throw new Error('Current password is incorrect');
+    throw new Error('Mật khẩu hiện tại không đúng');
   }
 
   user.password = newPassword;
@@ -192,7 +192,7 @@ const forgotPassword = async (email) => {
   const user = await User.findByEmail(email);
 
   if (!user) {
-    throw new Error('User not found');
+    throw new Error('Không tìm thấy người dùng');
   }
 
   const resetToken = crypto.randomBytes(32).toString('hex');
@@ -221,7 +221,7 @@ const resetPassword = async (token, newPassword) => {
   });
 
   if (!user) {
-    throw new Error('Invalid or expired reset token');
+    throw new Error('Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn');
   }
 
   user.password = newPassword;

@@ -8,7 +8,7 @@ const enrollStudent = async (req, res, next) => {
     const enrollment = await studentClassService.enrollStudent(req.body);
     res.status(201).json({
       status: 'success',
-      message: 'Student enrolled successfully',
+      message: 'Ghi danh học sinh thành công',
       data: { enrollment }
     });
   } catch (error) {
@@ -69,7 +69,7 @@ const updateEnrollment = async (req, res, next) => {
     const enrollment = await studentClassService.updateEnrollment(req.params.id, req.body);
     res.status(200).json({
       status: 'success',
-      message: 'Enrollment updated successfully',
+      message: 'Cập nhật đăng ký thành công',
       data: { enrollment }
     });
   } catch (error) {
@@ -86,7 +86,7 @@ const transferStudent = async (req, res, next) => {
     const result = await studentClassService.transferStudent(studentId, newClassId, notes);
     res.status(200).json({
       status: 'success',
-      message: 'Student transferred successfully',
+      message: 'Chuyển lớp học sinh thành công',
       data: result
     });
   } catch (error) {

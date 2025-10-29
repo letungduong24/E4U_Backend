@@ -7,10 +7,10 @@ const createHomework = async (payload) => {
   const { title, description, classId, deadline, file, teacherId } = payload;
   console.log(payload);
   const classDoc = await Class.findById(classId);
-  if (!classDoc) throw new Error("Class not found");
+  if (!classDoc) throw new Error("Không tìm thấy lớp học");
 
   if (new Date(deadline) <= new Date()) {
-    throw new Error("Deadline must be in the future");
+    throw new Error("Hạn nộp bài phải ở tương lai");
   }
 
   const homework = await Homework.create({
@@ -31,7 +31,7 @@ const getHomeworkById = async (homeworkId) => {
     "name code"
   );
 
-  if (!homework) throw new Error("Homework not found");
+  if (!homework) throw new Error("Không tìm thấy bài tập");
   return homework;
 };
 
@@ -41,7 +41,7 @@ const getHomeworkByClassId = async (classId) => {
     "name code"
   );
 
-  if (!homeworks) throw new Error("Homework not found");
+  if (!homeworks) throw new Error("Không tìm thấy bài tập");
   return homeworks;
 };
 
@@ -87,10 +87,10 @@ const listHomeworks = async (filters = {}) => {
 
 const updateHomework = async (homeworkId, updateData) => {
   const homework = await Homework.findById(homeworkId);
-  if (!homework) throw new Error("Homework not found");
+  if (!homework) throw new Error("Không tìm thấy bài tập");
 
   if (updateData.Deadline && new Date(updateData.Deadline) <= new Date()) {
-    throw new Error("Deadline must be in the future");
+    throw new Error("Hạn nộp bài phải ở tương lai");
   }
 
   const updatedHomework = await Homework.findByIdAndUpdate(
@@ -104,10 +104,10 @@ const updateHomework = async (homeworkId, updateData) => {
 
 const deleteHomework = async (homeworkId) => {
   const homework = await Homework.findById(homeworkId);
-  if (!homework) throw new Error("Homework not found");
+  if (!homework) throw new Error("Không tìm thấy bài tập");
 
   await Homework.findByIdAndDelete(homeworkId);
-  return { message: "Homework deleted successfully" };
+  return { message: "Xóa bài tập thành công" };
 };
 
 module.exports = {

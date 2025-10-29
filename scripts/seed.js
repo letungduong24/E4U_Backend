@@ -208,11 +208,22 @@ const connectDB = async () => {
 
 const seedDatabase = async () => {
   try {
-    // Clear existing data
-    await User.deleteMany({});
-    await Class.deleteMany({});
+    // Import all models first
+    const Schedule = require('../models/schedule.model');
+    const Homework = require('../models/homework.model');
+    const Document = require('../models/document.model');
+    const Submission = require('../models/submission.model');
+
+    // Clear existing data (order matters due to references)
+    console.log('🗑️  Clearing existing data...');
+    await Submission.deleteMany({});
+    await Homework.deleteMany({});
+    await Document.deleteMany({});
+    await Schedule.deleteMany({});
     await StudentClass.deleteMany({});
-    console.log('Cleared existing data');
+    await Class.deleteMany({});
+    await User.deleteMany({});
+    console.log('✅ Cleared existing data');
 
     // Create seed users
     const createdUsers = await User.create(seedUsers);
@@ -316,69 +327,299 @@ const seedDatabase = async () => {
       console.log(`👤 ${sc.student.firstName} ${sc.student.lastName} → 📚 ${sc.class.name} (${sc.class.code}) - Status: ${sc.status}`);
     });
 
+    // Calculate dates
+    const today = new Date();
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    const nextMonth = new Date(today);
+    nextMonth.setDate(today.getDate() + 30);
+    const lastWeek = new Date(today);
+    lastWeek.setDate(today.getDate() - 7);
 
+    // Helper function to format date as YYYY-MM-DD
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
 
-    console.log('\n✅ Database seeded successfully!');
+    // Get future dates for schedules
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const dayAfterTomorrow = new Date(today);
+    dayAfterTomorrow.setDate(today.getDate() + 2);
 
-
-    const Schedule = require('../models/schedule.model');
     // Create schedules for classes
-    console.log('\n📅 Creating schedules for classes...')
+    console.log('\n📅 Creating schedules for classes...');
+    
     const seedSchedules = [
-        {
-          class: class1._id,  
-          day: "2025-09-08",
-          period: "08:00-09:00"
-        },
-        {
-          class: class2._id,
-          day: "2025-09-09",
-          period: "08:00-09:00",
-        }
-      ];
-      await Schedule.deleteMany({});
-      for (const schedData of seedSchedules) {
-        const schedule = await Schedule.create(schedData);
-        console.log(`   Created schedule for class ${schedData.class} on ${schedData.day} at ${schedData.period}`);
-        await schedule.save();
-        console.log(`   Created period for schedule ${schedule._id}`);
+      // Class 1 - Future schedules
+      {
+        class: class1._id,
+        day: formatDate(tomorrow),
+        period: "08:00-09:00",
+        isDone: false
+      },
+      {
+        class: class1._id,
+        day: formatDate(tomorrow),
+        period: "09:10-10:10",
+        isDone: false
+      },
+      {
+        class: class1._id,
+        day: formatDate(dayAfterTomorrow),
+        period: "10:20-11:20",
+        isDone: false
+      },
+      {
+        class: class1._id,
+        day: formatDate(nextWeek),
+        period: "15:00-16:00",
+        isDone: false
+      },
+      // Class 2 - Future schedules
+      {
+        class: class2._id,
+        day: formatDate(tomorrow),
+        period: "13:50-14:50",
+        isDone: false
+      },
+      {
+        class: class2._id,
+        day: formatDate(dayAfterTomorrow),
+        period: "15:00-16:00",
+        isDone: false
+      },
+      {
+        class: class2._id,
+        day: formatDate(nextWeek),
+        period: "16:10-17:10",
+        isDone: false
+      },
+      // Past schedules (for testing)
+      {
+        class: class1._id,
+        day: formatDate(lastWeek),
+        period: "08:00-09:00",
+        isDone: true
+      },
+      {
+        class: class2._id,
+        day: formatDate(lastWeek),
+        period: "09:10-10:10",
+        isDone: true
       }
-      console.log('✅ Schedules created successfully!');
+    ];
 
-      const Homework = require('../models/homework.model');
-    // Create schedules for classes
-    console.log('\n📅 Creating homeworks for classes...')
+    const createdSchedules = await Schedule.insertMany(seedSchedules);
+    console.log(`✅ Created ${createdSchedules.length} schedules`);
+
+    // Create homeworks for classes
+    console.log('\n📝 Creating homeworks for classes...');
+    
     const seedHomeworks = [
-        {
-            title: "BT1",
-            description: "Bài tập thì quá khứ đơn",
-            classId: "68bbf5293fdcd59a9429ce2a",
-            deadline: "2026-06-07",
-            file: {
-              fileName: "baitap1.pdf",
-              filePath: "./src/hw/1.pdf"
-            },
-            teacherId: teachers[0]._id
+      {
+        title: "Bài tập Grammar - Thì quá khứ đơn",
+        description: "Hoàn thành bài tập về thì quá khứ đơn trong sách giáo khoa trang 45-50. Nộp bài trước deadline.",
+        classId: class1._id,
+        deadline: nextWeek,
+        file: {
+          fileName: "baitap_grammar_qua_khu_don.pdf",
+          filePath: "/uploads/homeworks/baitap_grammar_qua_khu_don.pdf"
         },
-        {
-            title: "BT2",
-            description: "Bài tập thì quá khứ đơn",
-            classId: "68bbf5293fdcd59a9429ce2a",
-            deadline: "2026-06-07",
-            file: {
-              fileName: "baitap2.pdf",
-              filePath: "./src/hw/2.pdf"
-            },
-            teacherId: teachers[1]._id
-        }
-      ];
-      await Homework.deleteMany({});
-      for (const homeworkData of seedHomeworks) {
-        const homework = await Homework.create(homeworkData);
-        console.log(`Created homework for class ${homeworkData.classId} with deadline ${homeworkData.deadline}`);
-        await homework.save();
+        teacherId: teachers[0]._id
+      },
+      {
+        title: "Bài tập Listening - Section 1-2",
+        description: "Nghe và trả lời câu hỏi trong bài nghe Listening Test 1. Viết câu trả lời ra giấy và nộp.",
+        classId: class1._id,
+        deadline: nextMonth,
+        file: {
+          fileName: "baitap_listening_section_1_2.pdf",
+          filePath: "/uploads/homeworks/baitap_listening_section_1_2.pdf"
+        },
+        teacherId: teachers[0]._id
+      },
+      {
+        title: "Bài tập Reading Comprehension",
+        description: "Đọc đoạn văn và trả lời các câu hỏi trắc nghiệm. Tối thiểu đạt 80% điểm để đạt yêu cầu.",
+        classId: class2._id,
+        deadline: nextWeek,
+        file: {
+          fileName: "baitap_reading_comprehension.pdf",
+          filePath: "/uploads/homeworks/baitap_reading_comprehension.pdf"
+        },
+        teacherId: teachers[1]._id
+      },
+      {
+        title: "Bài tập Writing - Opinion Essay",
+        description: "Viết một bài opinion essay với chủ đề về giáo dục trực tuyến. Độ dài tối thiểu 250 từ.",
+        classId: class2._id,
+        deadline: nextMonth,
+        file: {
+          fileName: "baitap_writing_opinion_essay.pdf",
+          filePath: "/uploads/homeworks/baitap_writing_opinion_essay.pdf"
+        },
+        teacherId: teachers[1]._id
+      },
+      {
+        title: "Bài tập Vocabulary - Unit 5",
+        description: "Học thuộc 50 từ vựng mới trong Unit 5 và làm bài tập điền từ vào chỗ trống.",
+        classId: class1._id,
+        deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
+        file: {
+          fileName: "baitap_vocabulary_unit_5.pdf",
+          filePath: "/uploads/homeworks/baitap_vocabulary_unit_5.pdf"
+        },
+        teacherId: teachers[0]._id
       }
-      console.log('✅ Homeworks created successfully!');
+    ];
+
+    const createdHomeworks = await Homework.insertMany(seedHomeworks);
+    console.log(`✅ Created ${createdHomeworks.length} homeworks`);
+
+    // Create documents for classes
+    console.log('\n📄 Creating documents for classes...');
+    
+    const seedDocuments = [
+      {
+        title: "Tài liệu Grammar - Thì quá khứ đơn",
+        description: "Tài liệu tổng hợp về thì quá khứ đơn trong tiếng Anh, bao gồm công thức, cách sử dụng và ví dụ minh họa.",
+        classId: class1._id,
+        teacherId: teachers[0]._id,
+        file: {
+          fileName: "tailieu_grammar_qua_khu_don.pdf",
+          filePath: "/uploads/documents/tailieu_grammar_qua_khu_don.pdf"
+        },
+        isActive: true
+      },
+      {
+        title: "Tài liệu Listening Tips & Strategies",
+        description: "Hướng dẫn chi tiết về các kỹ thuật nghe hiểu tiếng Anh, bao gồm cách làm bài thi IELTS Listening.",
+        classId: class1._id,
+        teacherId: teachers[0]._id,
+        file: {
+          fileName: "tailieu_listening_tips_strategies.pdf",
+          filePath: "/uploads/documents/tailieu_listening_tips_strategies.pdf"
+        },
+        isActive: true
+      },
+      {
+        title: "Tài liệu Reading Strategies - IELTS",
+        description: "Tài liệu về các chiến lược đọc hiểu trong bài thi IELTS, cách tìm thông tin nhanh và chính xác.",
+        classId: class2._id,
+        teacherId: teachers[1]._id,
+        file: {
+          fileName: "tailieu_reading_strategies_ielts.pdf",
+          filePath: "/uploads/documents/tailieu_reading_strategies_ielts.pdf"
+        },
+        isActive: true
+      },
+      {
+        title: "Tài liệu Writing - Opinion Essay Structure",
+        description: "Cấu trúc và cách viết một bài opinion essay trong IELTS Writing Task 2.",
+        classId: class2._id,
+        teacherId: teachers[1]._id,
+        file: {
+          fileName: "tailieu_writing_opinion_essay_structure.pdf",
+          filePath: "/uploads/documents/tailieu_writing_opinion_essay_structure.pdf"
+        },
+        isActive: true
+      },
+      {
+        title: "Tài liệu Vocabulary - Business English",
+        description: "Từ vựng tiếng Anh thương mại phổ biến, kèm theo ví dụ sử dụng trong ngữ cảnh thực tế.",
+        classId: class1._id,
+        teacherId: teachers[0]._id,
+        file: {
+          fileName: "tailieu_vocabulary_business_english.pdf",
+          filePath: "/uploads/documents/tailieu_vocabulary_business_english.pdf"
+        },
+        isActive: true
+      },
+      {
+        title: "Tài liệu Speaking - Common Topics",
+        description: "Các chủ đề thường gặp trong IELTS Speaking Part 1, Part 2 và Part 3, kèm câu trả lời mẫu.",
+        classId: class2._id,
+        teacherId: teachers[1]._id,
+        file: {
+          fileName: "tailieu_speaking_common_topics.pdf",
+          filePath: "/uploads/documents/tailieu_speaking_common_topics.pdf"
+        },
+        isActive: true
+      }
+    ];
+
+    const createdDocuments = await Document.insertMany(seedDocuments);
+    console.log(`✅ Created ${createdDocuments.length} documents`);
+
+    // Create submissions for homeworks
+    console.log('\n📤 Creating submissions for homeworks...');
+    
+    const seedSubmissions = [];
+    
+    // Some students submit homework 1 (class 1)
+    if (createdHomeworks[0] && studentsClass1.length > 0) {
+      for (let i = 0; i < Math.min(3, studentsClass1.length); i++) {
+        const submission = await Submission.create({
+          homeworkId: createdHomeworks[0]._id,
+          studentId: studentsClass1[i]._id,
+          file: `/uploads/submissions/homework_${createdHomeworks[0]._id}_student_${studentsClass1[i]._id}.pdf`,
+          status: i === 0 ? 'graded' : 'submitted', // First one is graded
+          grade: i === 0 ? 85 : undefined,
+          feedback: i === 0 ? 'Bài làm tốt, cần cải thiện phần ngữ pháp' : undefined,
+          gradedAt: i === 0 ? new Date() : undefined
+        });
+        seedSubmissions.push(submission);
+      }
+    }
+
+    // Some students submit homework 2 (class 1)
+    if (createdHomeworks[1] && studentsClass1.length > 0) {
+      for (let i = 1; i < Math.min(3, studentsClass1.length); i++) {
+        const submission = await Submission.create({
+          homeworkId: createdHomeworks[1]._id,
+          studentId: studentsClass1[i]._id,
+          file: `/uploads/submissions/homework_${createdHomeworks[1]._id}_student_${studentsClass1[i]._id}.pdf`,
+          status: 'submitted'
+        });
+        seedSubmissions.push(submission);
+      }
+    }
+
+    // Some students submit homework 3 (class 2)
+    if (createdHomeworks[2] && studentsClass2.length > 0) {
+      for (let i = 0; i < Math.min(4, studentsClass2.length); i++) {
+        const submission = await Submission.create({
+          homeworkId: createdHomeworks[2]._id,
+          studentId: studentsClass2[i]._id,
+          file: `/uploads/submissions/homework_${createdHomeworks[2]._id}_student_${studentsClass2[i]._id}.pdf`,
+          status: i === 0 ? 'graded' : 'submitted',
+          grade: i === 0 ? 92 : undefined,
+          feedback: i === 0 ? 'Excellent work! Keep it up.' : undefined,
+          gradedAt: i === 0 ? new Date() : undefined
+        });
+        seedSubmissions.push(submission);
+      }
+    }
+
+    console.log(`✅ Created ${seedSubmissions.length} submissions`);
+
+    // Display summary
+    console.log('\n📊 COMPLETE SEED DATA SUMMARY:');
+    console.log('='.repeat(60));
+    console.log(`✅ Users: ${createdUsers.length}`);
+    console.log(`   - Admin: ${createdUsers.filter(u => u.role === 'admin').length}`);
+    console.log(`   - Teachers: ${createdUsers.filter(u => u.role === 'teacher').length}`);
+    console.log(`   - Students: ${createdUsers.filter(u => u.role === 'student').length}`);
+    console.log(`✅ Classes: ${createdClasses.length}`);
+    console.log(`✅ Schedules: ${createdSchedules.length}`);
+    console.log(`✅ Homeworks: ${createdHomeworks.length}`);
+    console.log(`✅ Documents: ${createdDocuments.length}`);
+    console.log(`✅ Submissions: ${seedSubmissions.length}`);
+    console.log('\n✅ Database seeded successfully with all features!');
 
 
   } catch (error) {

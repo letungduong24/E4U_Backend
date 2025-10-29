@@ -16,10 +16,10 @@ const hasConflict = async (schedule) => {
 
 const createSchedule = async (payload) => {
   if (await hasConflict(payload)) {
-    throw new Error('Schedule conflict detected');
+    throw new Error('Phát hiện xung đột lịch học');
   }
   const classDoc = await ClassModel.findById(payload.class);
-  if (!classDoc) throw new Error('Class not found');
+  if (!classDoc) throw new Error('Không tìm thấy lớp học');
   const scheduleDocument = await ScheduleModel.create(payload);
   return scheduleDocument
 }
@@ -32,13 +32,13 @@ const listSchedulesByClassId = async (classId, day) => {
 
 const updateSchedule = async (scheduleId, updates) => {
   const schedule = await ScheduleModel.findByIdAndUpdate(scheduleId, updates, { new: true });
-  if (!schedule) throw new Error('Schedule not found');
+  if (!schedule) throw new Error('Không tìm thấy lịch học');
   return schedule;
 }
 
 const deleteSchedule = async (scheduleId) => {
   const schedule = await ScheduleModel.findByIdAndDelete(scheduleId);
-  if (!schedule) throw new Error('Schedule not found');
+  if (!schedule) throw new Error('Không tìm thấy lịch học');
   return schedule;
 }
 

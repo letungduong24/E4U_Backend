@@ -9,7 +9,7 @@ const router = express.Router();
 // Validation rules
 
 const setUserActiveValidation = [
-  body('isActive').isBoolean().withMessage('isActive must be a boolean value')
+  body('isActive').isBoolean().withMessage('isActive phải là giá trị boolean')
 ];
 
 
