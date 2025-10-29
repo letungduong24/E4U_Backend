@@ -76,6 +76,15 @@ router.put('/:id',
   submissionController.updateSubmission
 );
 
+router.delete('/:id',
+  authorize('student'),
+  [
+    param('id').isMongoId().withMessage('Valid submission ID is required')
+  ],
+  validate,
+  submissionController.deleteSubmission
+);
+
 router.get('/student',
   authorize('student'),
   submissionController.getStudentSubmissions

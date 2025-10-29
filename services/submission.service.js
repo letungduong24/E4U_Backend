@@ -8,15 +8,15 @@ const createSubmission = async (payload) => {
   
   // Lấy thông tin homework
   const homework = await Homework.findById(homeworkId).populate("classId", "name code");
-  if (!homework) throw new Error("Homework not found");
+  if (!homework) throw new Error("Không tìm thấy bài tập");
   
   // Lấy thông tin student
   const student = await User.findById(studentId).select("currentClass");
-  if (!student) throw new Error("Student not found");
+  if (!student) throw new Error("Không tìm thấy học sinh");
   
   // Kiểm tra student có thuộc lớp của homework không
   if (student.currentClass.toString() !== homework.classId._id.toString()) {
-    throw new Error("You can only submit homework for your own class");
+    throw new Error("Bạn chỉ có thể nộp bài tập của lớp mình");
   }
   
   // Kiểm tra đã nộp bài chưa
@@ -25,12 +25,12 @@ const createSubmission = async (payload) => {
     studentId,
   });
   if (existingSubmission) {
-    throw new Error("You have already submitted this homework");
+    throw new Error("Bạn đã nộp bài tập này rồi");
   }
 
   // Kiểm tra deadline
   if (new Date() > new Date(homework.deadline)) {
-    throw new Error("Submission deadline has passed");
+    throw new Error("Đã quá hạn nộp bài");
   }
   
   const submission = await Submission.create({
@@ -48,32 +48,32 @@ const createSubmission = async (payload) => {
 const updateSubmission = async (submissionId, studentId, updateData) => {
   const submission = await Submission.findById(submissionId);
 
-  if (!submission) throw new Error("Submission not found");
+  if (!submission) throw new Error("Không tìm thấy bài nộp");
 
   // Kiểm tra ownership
   if (submission.studentId.toString() !== studentId.toString()) {
-    throw new Error("You can only update your own submission");
+    throw new Error("Bạn chỉ có thể sửa bài nộp của chính mình");
   }
 
   // Lấy thông tin homework và class
   const homework = await Homework.findById(submission.homeworkId).populate("classId", "name code");
-  if (!homework) throw new Error("Homework not found");
+  if (!homework) throw new Error("Không tìm thấy bài tập");
   
   // Lấy thông tin student để kiểm tra lớp
   const student = await User.findById(studentId).select("currentClass");
-  if (!student) throw new Error("Student not found");
+  if (!student) throw new Error("Không tìm thấy học sinh");
   
   // Kiểm tra student có thuộc lớp của homework không
-  if (student.currentClass.toString() !== homework.classId._id.toString()) {
-    throw new Error("You can only update submission for your own class homework");
+  if (student.currentClass.toString() !== homework.classId.toString()) {
+    throw new Error("Bạn chỉ có thể sửa bài nộp của lớp mình");
   }
 
   if (submission.status === "graded") {
-    throw new Error("Cannot update a graded submission");
+    throw new Error("Không thể sửa bài đã được chấm");
   }
 
   if (new Date() > new Date(homework.deadline)) {
-    throw new Error("Cannot update submission after the deadline");
+    throw new Error("Không thể sửa bài sau khi đã quá hạn");
   }
   
   const updatedSubmission = await Submission.findByIdAndUpdate(
@@ -90,11 +90,11 @@ const updateSubmission = async (submissionId, studentId, updateData) => {
 // Chấm điểm và nhận xét 
 const gradeSubmission = async (submissionId, teacherId, { grade, feedback }) => {
   const submission = await Submission.findById(submissionId).populate("homeworkId");
-  if (!submission) throw new Error("Submission not found");
+  if (!submission) throw new Error("Không tìm thấy bài nộp");
   
   
   if (String(submission.homeworkId.teacherId) !== String(teacherId)) {
-    throw new Error("You are not authorized to grade this submission");
+    throw new Error("Bạn không có quyền chấm bài nộp này");
   }
   
 
@@ -127,11 +127,11 @@ const getStudentSubmissions = async (studentId, { status }) => {
 const getSubmissionById = async (submissionId, studentId = null) => {
   const submission = await Submission.findById(submissionId);
   
-  if (!submission) throw new Error("Submission not found");
+  if (!submission) throw new Error("Không tìm thấy bài nộp");
   
 
   if (studentId && submission.studentId.toString() !== studentId.toString()) {
-    throw new Error("You can only view your own submission");
+    throw new Error("Bạn chỉ có thể xem bài nộp của chính mình");
   }
   
   await submission.populate("studentId", "name email currentClass");
@@ -139,7 +139,7 @@ const getSubmissionById = async (submissionId, studentId = null) => {
   
   // Kiểm tra student có thuộc lớp của homework không (nếu là student)
   if (studentId && submission.studentId.currentClass.toString() !== submission.homeworkId.classId.toString()) {
-    throw new Error("You can only view submissions for your class homework");
+    throw new Error("Bạn chỉ có thể xem bài nộp của lớp mình");
   }
   
   return submission;
@@ -153,17 +153,17 @@ const getSubmissionByHomeworkIdForStudent = async (homeworkId, studentId) => {
     "name code"
   );
   
-  if (!homework) throw new Error("Homework not found");
+  if (!homework) throw new Error("Không tìm thấy bài tập");
   
   // Lấy thông tin student để kiểm tra lớp
   const User = require("../models/user.model");
   const student = await User.findById(studentId).select("currentClass");
   
-  if (!student) throw new Error("Student not found");
+  if (!student) throw new Error("Không tìm thấy học sinh");
   
 
   if (student.currentClass.toString() !== homework.classId._id.toString()) {
-    throw new Error("You can only view homework from your class");
+    throw new Error("Bạn chỉ có thể xem bài tập của lớp mình");
   }
   
   const submission = await Submission.findOne({
@@ -185,10 +185,10 @@ const getSubmissionsByHomeworkIdForTeacher = async (homeworkId, teacherId) => {
     "name code"
   );
   
-  if (!homework) throw new Error("Homework not found");
+  if (!homework) throw new Error("Không tìm thấy bài tập");
   
   if (homework.teacherId.toString() !== teacherId.toString()) {
-    throw new Error("You can only view submissions for your own homework");
+    throw new Error("Bạn chỉ có thể xem bài nộp của bài tập do mình tạo");
   }
   
   const submissions = await Submission.find({ homeworkId })
@@ -201,6 +201,44 @@ const getSubmissionsByHomeworkIdForTeacher = async (homeworkId, teacherId) => {
   };
 };
 
+// Xóa submission (chỉ được xóa khi chưa hết hạn HOẶC đã được chấm)
+const deleteSubmission = async (submissionId, studentId) => {
+  const submission = await Submission.findById(submissionId).populate("homeworkId");
+
+  if (!submission) throw new Error("Không tìm thấy bài nộp");
+
+  // Kiểm tra ownership
+  if (submission.studentId.toString() !== studentId.toString()) {
+    throw new Error("Bạn chỉ có thể xóa bài nộp của chính mình");
+  }
+
+  const homework = submission.homeworkId;
+  
+  // Lấy thông tin student để kiểm tra lớp
+  const student = await User.findById(studentId).select("currentClass");
+  if (!student) throw new Error("Không tìm thấy học sinh");
+  
+  // Kiểm tra student có thuộc lớp của homework không
+  if (student.currentClass.toString() !== homework.classId.toString()) {
+    throw new Error("Bạn chỉ có thể xóa bài nộp của lớp mình");
+  }
+
+  // Điều kiện xóa: chưa hết hạn HOẶC đã được chấm
+  const isDeadlinePassed = new Date() > new Date(homework.deadline);
+  const isGraded = submission.status === "graded";
+  
+  if (!isDeadlinePassed || isGraded) {
+    // Có thể xóa (chưa hết hạn HOẶC đã được chấm)
+  } else {
+    // Không được xóa (đã hết hạn VÀ chưa được chấm)
+    throw new Error("Không thể xóa bài nộp đã quá hạn và chưa được chấm điểm");
+  }
+  
+  await Submission.findByIdAndDelete(submissionId);
+  
+  return { message: "Xóa bài nộp thành công" };
+};
+
 module.exports = {
   createSubmission,
   updateSubmission,
@@ -208,5 +246,6 @@ module.exports = {
   getStudentSubmissions,
   getSubmissionById,
   getSubmissionByHomeworkIdForStudent,
-  getSubmissionsByHomeworkIdForTeacher
+  getSubmissionsByHomeworkIdForTeacher,
+  deleteSubmission
 };

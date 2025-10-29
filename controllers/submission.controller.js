@@ -174,6 +174,27 @@ const getSubmissionsByHomeworkIdForTeacher = async (req, res, next) => {
   }
 };
 
+// @desc    Delete submission
+// @route   DELETE /api/submissions/:id
+// @access  Student only (owner)
+const deleteSubmission = async (req, res, next) => {
+  try {
+    const user = req.user;
+    if (user.role !== 'student') {
+      return res.status(403).json({ status: 'fail', message: 'Access denied - Only students can delete submissions' });
+    }
+    
+    const result = await submissionService.deleteSubmission(req.params.id, user._id);
+    
+    res.status(200).json({
+      status: 'success',
+      data: result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createSubmission,
   updateSubmission,
@@ -181,5 +202,6 @@ module.exports = {
   getStudentSubmissions,
   getSubmissionById,
   getSubmissionByHomeworkIdForStudent,
-  getSubmissionsByHomeworkIdForTeacher
+  getSubmissionsByHomeworkIdForTeacher,
+  deleteSubmission
 };
