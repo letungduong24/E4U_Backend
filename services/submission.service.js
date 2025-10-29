@@ -55,18 +55,9 @@ const updateSubmission = async (submissionId, studentId, updateData) => {
     throw new Error("Bạn chỉ có thể sửa bài nộp của chính mình");
   }
 
-  // Lấy thông tin homework và class
+  // Lấy thông tin homework
   const homework = await Homework.findById(submission.homeworkId).populate("classId", "name code");
   if (!homework) throw new Error("Không tìm thấy bài tập");
-  
-  // Lấy thông tin student để kiểm tra lớp
-  const student = await User.findById(studentId).select("currentClass");
-  if (!student) throw new Error("Không tìm thấy học sinh");
-  
-  // Kiểm tra student có thuộc lớp của homework không
-  if (student.currentClass.toString() !== homework.classId.toString()) {
-    throw new Error("Bạn chỉ có thể sửa bài nộp của lớp mình");
-  }
 
   if (submission.status === "graded") {
     throw new Error("Không thể sửa bài đã được chấm");
@@ -213,15 +204,6 @@ const deleteSubmission = async (submissionId, studentId) => {
   }
 
   const homework = submission.homeworkId;
-  
-  // Lấy thông tin student để kiểm tra lớp
-  const student = await User.findById(studentId).select("currentClass");
-  if (!student) throw new Error("Không tìm thấy học sinh");
-  
-  // Kiểm tra student có thuộc lớp của homework không
-  if (student.currentClass.toString() !== homework.classId.toString()) {
-    throw new Error("Bạn chỉ có thể xóa bài nộp của lớp mình");
-  }
 
   // Điều kiện xóa: chưa hết hạn HOẶC đã được chấm
   const isDeadlinePassed = new Date() > new Date(homework.deadline);
