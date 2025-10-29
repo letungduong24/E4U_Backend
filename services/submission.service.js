@@ -73,7 +73,7 @@ const updateSubmission = async (submissionId, studentId, updateData) => {
     { new: true, runValidators: true }
   );
   
-  await updatedSubmission.populate("studentId", "name email");
+  await updatedSubmission.populate("studentId", "firstName lastName email");
   await updatedSubmission.populate("homeworkId", "description deadline classId");
   return updatedSubmission;
 };
@@ -96,7 +96,7 @@ const gradeSubmission = async (submissionId, teacherId, { grade, feedback }) => 
   
   await submission.save();
   
-  await submission.populate("studentId", "name email");
+  await submission.populate("studentId", "firstName lastName email");
   await submission.populate("homeworkId", "description deadline classId");
   return submission;
 };
@@ -125,7 +125,7 @@ const getSubmissionById = async (submissionId, studentId = null) => {
     throw new Error("Bạn chỉ có thể xem bài nộp của chính mình");
   }
   
-  await submission.populate("studentId", "name email currentClass");
+  await submission.populate("studentId", "firstName lastName email currentClass");
   await submission.populate("homeworkId", "description deadline classId");
   
   // Kiểm tra student có thuộc lớp của homework không (nếu là student)
@@ -183,7 +183,7 @@ const getSubmissionsByHomeworkIdForTeacher = async (homeworkId, teacherId) => {
   }
   
   const submissions = await Submission.find({ homeworkId })
-    .populate("studentId", "name email")
+    .populate("studentId", "firstName lastName email")
     .sort({ createdAt: -1 });
   
   return {
