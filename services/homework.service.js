@@ -48,6 +48,7 @@ const getHomeworkByClassId = async (classId) => {
 const listHomeworks = async (filters = {}) => {
   const {
     classId,
+    teacherId,
     search,
     deadline,
     sortBy = "deadline",
@@ -57,6 +58,7 @@ const listHomeworks = async (filters = {}) => {
   const query = {};
 
   if (classId) query.classId = classId;
+  if (teacherId) query.teacherId = teacherId;
   
   // Tìm kiếm theo cả title và description
   if (search) {
