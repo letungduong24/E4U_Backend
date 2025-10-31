@@ -261,9 +261,8 @@ const seedDatabase = async () => {
       });
       studentClassRecords1.push(studentClassRecord);
       
-      // Update student's current class and enrollment history
+      // Update student's current class
       student.currentClass = class1._id;
-      student.enrollmentHistory.push(studentClassRecord._id);
       await student.save();
     }
 
@@ -278,9 +277,8 @@ const seedDatabase = async () => {
       });
       studentClassRecords2.push(studentClassRecord);
       
-      // Update student's current class and enrollment history
+      // Update student's current class
       student.currentClass = class2._id;
-      student.enrollmentHistory.push(studentClassRecord._id);
       await student.save();
     }
 

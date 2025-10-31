@@ -69,18 +69,6 @@ const listUsers = async ({ role, classId, q }) => {
         select: 'firstName lastName'
       }
     })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
-      }
-    })
     .sort({ createdAt: -1 });
 
   return users;
@@ -132,20 +120,8 @@ const createUser = async (userData) => {
         path: 'homeroomTeacher',
         select: 'firstName lastName'
       }
-    })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
-      }
     });
-  
+
   return userWithPopulate;
 };
 
@@ -166,18 +142,6 @@ const getUserById = async (userId) => {
       populate: {
         path: 'homeroomTeacher',
         select: 'firstName lastName'
-      }
-    })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
       }
     });
   if (!user) throw new Error('Không tìm thấy người dùng');
@@ -226,18 +190,6 @@ const updateUserByAdmin = async (userId, updateData) => {
         path: 'homeroomTeacher',
         select: 'firstName lastName'
       }
-    })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
-      }
     });
 
   if (!user) throw new Error('Không tìm thấy người dùng');
@@ -280,18 +232,6 @@ const setUserActiveStatus = async (userId, isActive) => {
       populate: {
         path: 'homeroomTeacher',
         select: 'firstName lastName'
-      }
-    })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
       }
     });
   if (!user) throw new Error('Không tìm thấy người dùng');

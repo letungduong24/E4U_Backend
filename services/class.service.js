@@ -116,10 +116,9 @@ const addStudent = async (classId, studentId) => {
       enrolledAt: new Date()
     });
     
-    // Update student's current class and enrollment history
+    // Update student's current class
     await User.findByIdAndUpdate(studentId, {
-      currentClass: classId,
-      $addToSet: { enrollmentHistory: enrollment._id }
+      currentClass: classId
     });
     
     // Update class with student and enrollment
@@ -223,18 +222,6 @@ const setTeacherClass = async (teacherId, classId) => {
         path: 'homeroomTeacher',
         select: 'firstName lastName'
       }
-    })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
-      }
     });
   
   // Update class homeroom teacher and get updated class
@@ -286,18 +273,6 @@ const removeTeacherFromClass = async (teacherId) => {
       populate: {
         path: 'homeroomTeacher',
         select: 'firstName lastName'
-      }
-    })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
       }
     });
   
@@ -358,18 +333,6 @@ const getUnassignedTeachers = async () => {
         select: 'firstName lastName'
       }
     })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
-      }
-    })
     .sort({ createdAt: -1 });
   
   return teachers;
@@ -417,18 +380,6 @@ const getUnassignedStudents = async () => {
         select: 'firstName lastName'
       }
     })
-    .populate({
-      path: 'enrollmentHistory',
-      select: 'status enrolledAt completedAt droppedAt notes',
-      populate: {
-        path: 'class',
-        select: 'name code description homeroomTeacher maxStudents isActive',
-        populate: {
-          path: 'homeroomTeacher',
-          select: 'firstName lastName email'
-        }
-      }
-    })
     .sort({ createdAt: -1 });
   
   return students;
@@ -464,22 +415,24 @@ const getClassStudents = async (classId) => {
       maxStudents: cls.maxStudents,
       isActive: cls.isActive
     },
-    students: enrollments.map(enrollment => ({
-      _id: enrollment.student._id,
-      firstName: enrollment.student.firstName,
-      lastName: enrollment.student.lastName,
-      email: enrollment.student.email,
-      phoneNumber: enrollment.student.phoneNumber,
-      dateOfBirth: enrollment.student.dateOfBirth,
-      address: enrollment.student.address,
-      currentClass: enrollment.student.currentClass,
-      enrollmentInfo: {
-        _id: enrollment._id,
-        status: enrollment.status,
-        enrolledAt: enrollment.enrolledAt,
-        notes: enrollment.notes
-      }
-    }))
+    students: enrollments
+      .filter(enrollment => enrollment.student !== null)
+      .map(enrollment => ({
+        _id: enrollment.student._id,
+        firstName: enrollment.student.firstName,
+        lastName: enrollment.student.lastName,
+        email: enrollment.student.email,
+        phoneNumber: enrollment.student.phoneNumber,
+        dateOfBirth: enrollment.student.dateOfBirth,
+        address: enrollment.student.address,
+        currentClass: enrollment.student.currentClass,
+        enrollmentInfo: {
+          _id: enrollment._id,
+          status: enrollment.status,
+          enrolledAt: enrollment.enrolledAt,
+          notes: enrollment.notes
+        }
+      }))
   };
 };
 

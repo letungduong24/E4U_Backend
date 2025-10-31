@@ -59,8 +59,7 @@ const enrollStudent = async (enrollmentData) => {
   
   // Update user current class
   await User.findByIdAndUpdate(student, {
-    currentClass: classId,
-    $addToSet: { enrollmentHistory: enrollment._id }
+    currentClass: classId
   });
   
   // Update class references
@@ -233,8 +232,7 @@ const transferStudent = async (studentId, newClassId, notes = '') => {
   
   // Update user current class
   await User.findByIdAndUpdate(studentId, {
-    currentClass: newClassId,
-    $addToSet: { enrollmentHistory: newEnrollment._id }
+    currentClass: newClassId
   });
   
   // Update class references
