@@ -98,6 +98,21 @@ const addStudent = async (classId, studentId) => {
     existingEnrollment.enrolledAt = new Date();
     existingEnrollment.droppedAt = null;
     await existingEnrollment.save();
+    
+    // Update student's current class
+    await User.findByIdAndUpdate(studentId, {
+      currentClass: classId
+    });
+    
+    // Update class with student
+    await ClassModel.findByIdAndUpdate(
+      classId,
+      { 
+        $addToSet: { 
+          students: studentId
+        } 
+      }
+    );
   } else {
     // Check if student has active enrollment elsewhere
     const currentEnrollment = await StudentClass.findOne({ 
@@ -161,10 +176,14 @@ const removeStudent = async (classId, studentId) => {
   enrollment.droppedAt = new Date();
   await enrollment.save();
   
-  // Remove current class from student
-  await User.findByIdAndUpdate(studentId, {
-    $unset: { currentClass: 1 }
-  });
+  // Get student to check current class
+  const student = await User.findById(studentId);
+  if (student && student.currentClass && student.currentClass.toString() === classId) {
+    // Only remove current class if it matches this class
+    await User.findByIdAndUpdate(studentId, {
+      $unset: { currentClass: 1 }
+    });
+  }
   
   // Remove student from class
   const updatedClass = await ClassModel.findByIdAndUpdate(
