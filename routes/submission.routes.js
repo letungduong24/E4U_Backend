@@ -2,7 +2,6 @@ const express = require('express');
 const { protect, authorize } = require('../middleware/auth');
 const { body, param, query } = require('express-validator');
 const validate = require('../middleware/validate');
-const upload = require('../middleware/upload');
 const submissionController = require('../controllers/submission.controller');
 
 const router = express.Router();
@@ -14,13 +13,9 @@ const submissionCreateValidation = [
     .withMessage('homeworkId hợp lệ là bắt buộc'),
   body('file')
     .optional()
-    .custom((value) => {
-      // Cho phép file upload hoặc object
-      if (typeof value === 'string' || typeof value === 'object' || value === undefined) {
-        return true;
-      }
-      throw new Error('File phải là một tệp hoặc object hợp lệ');
-    })
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage('Link file không được để trống')
 ];
 
 const submissionUpdateValidation = [
@@ -29,13 +24,9 @@ const submissionUpdateValidation = [
     .withMessage('ID bài nộp hợp lệ là bắt buộc'),
   body('file')
     .optional()
-    .custom((value) => {
-      // Cho phép file upload hoặc object
-      if (typeof value === 'string' || typeof value === 'object' || value === undefined) {
-        return true;
-      }
-      throw new Error('File phải là một tệp hoặc object hợp lệ');
-    })
+    .trim()
+    .isLength({ min: 1 })
+    .withMessage('Link file không được để trống')
 ];
 
 const gradeValidation = [
@@ -62,7 +53,6 @@ router.use(protect);
 // Student routes
 router.post('/',
   authorize('student'),
-  upload.single('file'),
   submissionCreateValidation,
   validate,
   submissionController.createSubmission
@@ -70,7 +60,6 @@ router.post('/',
 
 router.put('/:id',
   authorize('student'),
-  upload.single('file'),
   submissionUpdateValidation,
   validate,
   submissionController.updateSubmission
