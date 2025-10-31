@@ -213,9 +213,17 @@ const setTeacherClass = async (teacherId, classId) => {
   if (!classDoc) throw new Error('Không tìm thấy lớp học');
   if (!classDoc.isActive) throw new Error('Lớp học không hoạt động');
   
-  // Check if class already has a homeroom teacher
+  // Check if class already has a homeroom teacher (and verify teacher still exists)
   if (classDoc.homeroomTeacher && classDoc.homeroomTeacher.toString() !== teacherId) {
-    throw new Error('Lớp học đã có giáo viên chủ nhiệm');
+    // Verify the existing teacher still exists
+    const existingTeacher = await User.findById(classDoc.homeroomTeacher);
+    if (existingTeacher) {
+      throw new Error('Lớp học đã có giáo viên chủ nhiệm');
+    }
+    // If teacher doesn't exist anymore (deleted), clean up the reference
+    await ClassModel.findByIdAndUpdate(classId, {
+      $unset: { homeroomTeacher: 1 }
+    });
   }
   
   // Update teacher's teaching class

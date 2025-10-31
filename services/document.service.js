@@ -76,8 +76,6 @@ const listDocuments = async (filters = {}) => {
       classId,
       teacherId,
       search,
-      page = 1,
-      limit = 10,
       sortBy = 'createdAt',
       sortOrder = 'desc'
     } = filters;
@@ -106,29 +104,12 @@ const listDocuments = async (filters = {}) => {
     const sort = {};
     sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-    // Calculate pagination
-    const skip = (page - 1) * limit;
-
     // Execute query
     const documents = await Document.find(query)
       .populate('classId', 'name code')
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit));
+      .sort(sort);
 
-    // Get total count for pagination
-    const total = await Document.countDocuments(query);
-
-    return {
-      documents,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / limit),
-        totalDocuments: total,
-        hasNextPage: page < Math.ceil(total / limit),
-        hasPrevPage: page > 1
-      }
-    };
+    return documents;
   } catch (error) {
     throw error;
   }
@@ -206,8 +187,7 @@ const searchDocuments = async (searchTerm, classId = null) => {
 
     const documents = await Document.find(query)
       .populate('classId', 'name code')
-      .sort({ createdAt: -1 })
-      .limit(20);
+      .sort({ createdAt: -1 });
 
     return documents;
   } catch (error) {

@@ -3,6 +3,7 @@ const Class = require('../models/class.model');
 const Homework = require('../models/homework.model');
 const Document = require('../models/document.model');
 const Schedule = require('../models/schedule.model');
+const StudentClass = require('../models/student_class.model');
 const authService = require('./auth.service');
 const studentClassService = require('./student_class.service');
 const mongoose = require('mongoose');
@@ -204,6 +205,27 @@ const deleteUser = async (userId) => {
   // Prevent deletion of admin users
   if (user.role === 'admin') {
     throw new Error('Không thể xóa người dùng admin');
+  }
+  
+  // If deleting a teacher, remove from their assigned class
+  if (user.role === 'teacher' && user.teachingClass) {
+    await Class.findByIdAndUpdate(user.teachingClass, {
+      $unset: { homeroomTeacher: 1 }
+    });
+  }
+  
+  // If deleting a student, remove from their current class
+  if (user.role === 'student' && user.currentClass) {
+    // Update StudentClass enrollment to dropped
+    await StudentClass.updateMany(
+      { student: userId, status: 'enrolled' },
+      { status: 'dropped', droppedAt: new Date() }
+    );
+    
+    // Remove from class students array
+    await Class.findByIdAndUpdate(user.currentClass, {
+      $pull: { students: userId }
+    });
   }
   
   // Delete the user

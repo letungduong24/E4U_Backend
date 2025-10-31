@@ -190,12 +190,11 @@ const listDocuments = async (req, res, next) => {
       });
     }
 
-    const result = await documentService.listDocuments(filters);
+    const documents = await documentService.listDocuments(filters);
 
     res.status(200).json({
       status: 'success',
-      data: result.documents,
-      pagination: result.pagination,
+      data: documents,
       role: user.role
     });
   } catch (error) {
