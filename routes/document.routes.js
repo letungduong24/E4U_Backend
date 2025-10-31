@@ -16,11 +16,10 @@ const createDocumentValidation = [
     .trim()
     .isLength({ min: 1, max: 2000 })
     .withMessage('Mô tả phải có từ 1 đến 2000 ký tự'),
-  body('file')
-    .optional()
+  body('link')
     .trim()
-    .isLength({ min: 1 })
-    .withMessage('Đường dẫn tệp không được để trống')
+    .isURL()
+    .withMessage('Link tài liệu phải là URL hợp lệ')
 ];
 
 const updateDocumentValidation = [
@@ -34,11 +33,11 @@ const updateDocumentValidation = [
     .trim()
     .isLength({ min: 1, max: 2000 })
     .withMessage('Mô tả phải có từ 1 đến 2000 ký tự'),
-  body('file')
+  body('link')
     .optional()
     .trim()
-    .isLength({ min: 1 })
-    .withMessage('Đường dẫn tệp không được để trống')
+    .isURL()
+    .withMessage('Link tài liệu phải là URL hợp lệ')
 ];
 
 const searchValidation = [
@@ -83,11 +82,6 @@ router.get('/class/:classId', documentController.getDocumentsByClassId);
 // @desc    Get document by ID
 // @access  Teacher, Student (if enrolled in the class)
 router.get('/:id', documentController.getDocumentById);
-
-// @route   GET /api/documents/:id/download
-// @desc    Download document file
-// @access  Teacher, Student (if enrolled in the class)
-router.get('/:id/download', documentController.downloadDocument);
 
 // @route   PUT /api/documents/:id
 // @desc    Update document

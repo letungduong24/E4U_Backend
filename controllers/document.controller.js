@@ -1,56 +1,4 @@
 const documentService = require('../services/document.service');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = 'uploads/documents';
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
-});
-
-const fileFilter = (req, file, cb) => {
-  // Allow common document file types
-  const allowedTypes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'application/vnd.ms-excel',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    'text/plain',
-    'text/csv',
-    'image/jpeg',
-    'image/png',
-    'image/gif'
-  ];
-
-  if (allowedTypes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Invalid file type. Only documents, images, and text files are allowed.'), false);
-  }
-};
-
-const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
-  }
-});
 
 // @desc    Create document
 // @route   POST /api/documents
@@ -66,7 +14,14 @@ const createDocument = async (req, res, next) => {
       });
     }
 
-    const { title, description, file } = req.body;
+    const { title, description, link } = req.body;
+
+    if (!link) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Link tài liệu là bắt buộc'
+      });
+    }
 
     const documentData = {
       title,
@@ -74,11 +29,8 @@ const createDocument = async (req, res, next) => {
       classId: user.teachingClass,
       teacherId: user._id,
       file: {
-        fileName: file || 'document.txt',
-        originalName: file || 'document.txt',
-        filePath: file || './uploads/documents/default.txt',
-        fileSize: 0,
-        mimeType: 'text/plain'
+        fileName: link,
+        filePath: link
       }
     };
 
@@ -218,14 +170,11 @@ const updateDocument = async (req, res, next) => {
 
     const updateData = { ...req.body };
 
-    // If file is provided in body, update file information
-    if (req.body.file) {
+    // If link is provided in body, update file information
+    if (req.body.link) {
       updateData.file = {
-        fileName: req.body.file,
-        originalName: req.body.file,
-        filePath: req.body.file,
-        fileSize: 0,
-        mimeType: 'text/plain'
+        fileName: req.body.link,
+        filePath: req.body.link
       };
     }
 
@@ -259,15 +208,7 @@ const deleteDocument = async (req, res, next) => {
       });
     }
 
-    // Get document info before deletion to clean up file
-    const document = await documentService.getDocumentById(req.params.id);
-    
     const result = await documentService.deleteDocument(req.params.id, user._id);
-
-    // Delete the physical file
-    if (document.file && fs.existsSync(document.file.filePath)) {
-      fs.unlinkSync(document.file.filePath);
-    }
 
     res.status(200).json({
       status: 'success',
@@ -320,62 +261,6 @@ const searchDocuments = async (req, res, next) => {
   }
 };
 
-// @desc    Download document file
-// @route   GET /api/documents/:id/download
-// @access  Teacher, Student (if enrolled in the class)
-const downloadDocument = async (req, res, next) => {
-  try {
-    const document = await documentService.getDocumentById(req.params.id);
-    const user = req.user;
-
-    // Check access permissions
-    if (user.role === 'student') {
-      if (user.currentClass.toString() !== document.classId._id.toString()) {
-        return res.status(403).json({
-          status: 'fail',
-          message: 'Truy cập bị từ chối. Bạn chỉ có thể tải xuống tài liệu từ lớp của mình.'
-        });
-      }
-    } else if (user.role === 'teacher') {
-      if (user._id.toString() !== document.teacherId.toString()) {
-        return res.status(403).json({
-          status: 'fail',
-          message: 'Truy cập bị từ chối. Bạn chỉ có thể tải xuống tài liệu của chính mình.'
-        });
-      }
-    } else {
-      return res.status(403).json({
-        status: 'fail',
-        message: 'Access denied. Only teachers and students can download documents.'
-      });
-    }
-
-    // Return file information (giống homework - không download file thật)
-    res.status(200).json({
-      status: 'success',
-      message: 'Lấy thông tin tệp tài liệu thành công',
-      data: {
-        document: {
-          _id: document._id,
-          title: document.title,
-          description: document.description,
-          file: {
-            fileName: document.file.fileName,
-            originalName: document.file.originalName,
-            filePath: document.file.filePath,
-            fileSize: document.file.fileSize,
-            mimeType: document.file.mimeType
-          },
-          uploadDate: document.uploadDate,
-          lastModified: document.lastModified
-        }
-      }
-    });
-
-  } catch (error) {
-    next(error);
-  }
-};
 
 
 module.exports = {
@@ -385,7 +270,5 @@ module.exports = {
   listDocuments,
   updateDocument,
   deleteDocument,
-  searchDocuments,
-  downloadDocument,
-  upload // Export multer upload middleware
+  searchDocuments
 };
