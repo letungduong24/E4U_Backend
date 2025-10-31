@@ -65,28 +65,11 @@ const enrollStudent = async (enrollmentData) => {
   // Update class references
   await Class.findByIdAndUpdate(classId, {
     $addToSet: { 
-      students: student,
-      enrollments: enrollment._id
+      students: student
     }
   });
   
   return enrollment;
-};
-
-// Get student's enrollment history
-const getStudentHistory = async (studentId) => {
-  const history = await StudentClass.find({ student: studentId })
-    .populate({
-      path: 'class',
-      select: 'name code description homeroomTeacher maxStudents isActive',
-      populate: {
-        path: 'homeroomTeacher',
-        select: 'firstName lastName email'
-      }
-    })
-    .sort({ enrolledAt: -1 });
-
-  return history;
 };
 
 // Get class enrollments
@@ -237,13 +220,12 @@ const transferStudent = async (studentId, newClassId, notes = '') => {
   
   // Update class references
   await Class.findByIdAndUpdate(currentEnrollment.class, {
-    $pull: { students: studentId, enrollments: currentEnrollment._id }
+    $pull: { students: studentId }
   });
   
   await Class.findByIdAndUpdate(newClassId, {
     $addToSet: { 
-      students: studentId,
-      enrollments: newEnrollment._id
+      students: studentId
     }
   });
   
@@ -255,7 +237,6 @@ const transferStudent = async (studentId, newClassId, notes = '') => {
 
 module.exports = {
   enrollStudent,
-  getStudentHistory,
   getClassEnrollments,
   getEnrollmentById,
   updateEnrollment,

@@ -121,13 +121,12 @@ const addStudent = async (classId, studentId) => {
       currentClass: classId
     });
     
-    // Update class with student and enrollment
+    // Update class with student
     await ClassModel.findByIdAndUpdate(
       classId,
       { 
         $addToSet: { 
-          students: studentId,
-          enrollments: enrollment._id
+          students: studentId
         } 
       }
     );

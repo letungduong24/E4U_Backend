@@ -47,14 +47,6 @@ studentClassSchema.index({ student: 1, status: 1 });
 studentClassSchema.index({ class: 1, status: 1 });
 studentClassSchema.index({ enrolledAt: -1 });
 
-
-// Static method to get student's class history
-studentClassSchema.statics.getStudentHistory = function(studentId) {
-  return this.find({ student: studentId })
-    .populate('class', 'name code description')
-    .sort({ enrolledAt: -1 });
-};
-
 // Static method to get class enrollment list
 studentClassSchema.statics.getClassEnrollments = function(classId) {
   return this.find({ class: classId })

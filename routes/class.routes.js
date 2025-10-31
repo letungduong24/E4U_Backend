@@ -57,7 +57,6 @@ router.delete('/:id/students', removeStudentValidation, validate, classControlle
 // Student enrollment management routes
 router.post('/transfer', transferStudentValidation, validate, classController.transferStudent);
 router.post('/enroll', enrollStudentValidation, validate, classController.enrollStudent);
-router.get('/students/:studentId/history', classController.getStudentHistory);
 
 // Homeroom teacher management routes
 router.post('/:id/teacher', setTeacherValidation, validate, classController.setHomeroomTeacher);

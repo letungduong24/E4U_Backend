@@ -129,21 +129,6 @@ const enrollStudent = async (req, res, next) => {
   }
 };
 
-// @desc    Get student enrollment history
-// @route   GET /api/classes/students/:studentId/history
-// @access  Admin
-const getStudentHistory = async (req, res, next) => {
-  try {
-    const history = await studentClassService.getStudentHistory(req.params.studentId);
-    res.status(200).json({
-      status: 'success',
-      data: { history }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // @desc    Set homeroom teacher for class
 // @route   POST /api/classes/:id/teacher
 // @access  Admin
@@ -245,12 +230,11 @@ module.exports = {
   deleteClass,
   addStudent,
   removeStudent,
+  getClassStudents,
+  getUnassignedStudents,
   // Student enrollment management
   transferStudent,
   enrollStudent,
-  getStudentHistory,
-  getClassStudents,
-  getUnassignedStudents,
   // Homeroom teacher management
   setHomeroomTeacher,
   removeHomeroomTeacher,

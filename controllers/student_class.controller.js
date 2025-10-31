@@ -16,21 +16,6 @@ const enrollStudent = async (req, res, next) => {
   }
 };
 
-// @desc    Get student's enrollment history
-// @route   GET /api/student-classes/student/:studentId
-// @access  Private (Admin only)
-const getStudentHistory = async (req, res, next) => {
-  try {
-    const history = await studentClassService.getStudentHistory(req.params.studentId);
-    res.status(200).json({
-      status: 'success',
-      data: { history }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // @desc    Get class enrollments
 // @route   GET /api/student-classes/class/:classId
 // @access  Private (Admin only)
@@ -96,7 +81,6 @@ const transferStudent = async (req, res, next) => {
 
 module.exports = {
   enrollStudent,
-  getStudentHistory,
   getClassEnrollments,
   getEnrollmentById,
   updateEnrollment,

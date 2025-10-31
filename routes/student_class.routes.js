@@ -29,7 +29,6 @@ router.use(protect, authorize('admin'));
 // Enrollment management
 router.post('/', enrollmentValidation, validate, studentClassController.enrollStudent);
 router.post('/transfer', transferValidation, validate, studentClassController.transferStudent);
-router.get('/student/:studentId', studentClassController.getStudentHistory);
 router.get('/class/:classId', studentClassController.getClassEnrollments);
 router.get('/:id', studentClassController.getEnrollmentById);
 router.put('/:id', updateEnrollmentValidation, validate, studentClassController.updateEnrollment);

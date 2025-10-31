@@ -282,13 +282,11 @@ const seedDatabase = async () => {
       await student.save();
     }
 
-    // Update class enrollments
+    // Update class students
     class1.students = studentsClass1.map(s => s._id);
-    class1.enrollments = studentClassRecords1.map(sc => sc._id);
     await class1.save();
 
     class2.students = studentsClass2.map(s => s._id);
-    class2.enrollments = studentClassRecords2.map(sc => sc._id);
     await class2.save();
 
     // Update teacher teaching classes
@@ -312,7 +310,6 @@ const seedDatabase = async () => {
     createdClasses.forEach(cls => {
       console.log(`📚 ${cls.name} (${cls.code}) - Teacher: ${cls.homeroomTeacher}`);
       console.log(`   Students: ${cls.students.length}/${cls.maxStudents} students`);
-      console.log(`   Enrollments: ${cls.enrollments.length} StudentClass records`);
       console.log(`   Description: ${cls.description}`);
     });
 
